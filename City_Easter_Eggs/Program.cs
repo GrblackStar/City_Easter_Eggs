@@ -27,8 +27,11 @@ namespace City_Easter_Eggs
 			app.UseAuthorization();
 
 			app.MapRazorPages();
+            //app.MapControllers();
 
-			app.Run();
+            app.MapDefaultControllerRoute();
+
+            app.Run();
 		}
 	}
 }
