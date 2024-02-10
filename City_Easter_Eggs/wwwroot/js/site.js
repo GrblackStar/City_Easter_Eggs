@@ -1,4 +1,27 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿async function GetUserLocation() {
+    function error(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
 
-// Write your JavaScript code.
+    const options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+    };
+
+    return new Promise((onDoneFunc) => {
+        navigator.geolocation.getCurrentPosition(onDoneFunc, error, options);
+    })
+}
+
+async function HttpGet(theUrl) {
+    return new Promise((onDoneFunc) => {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                onDoneFunc(xmlHttp.responseText);
+        }
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.send(null);
+    });
+}

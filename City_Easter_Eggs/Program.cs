@@ -1,66 +1,65 @@
+#region Using
+
+using AspNetCore.ReCaptcha;
+using City_Easter_Eggs.Controllers;
 using City_Easter_Eggs.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using SecurityStampValidator = City_Easter_Eggs.Helpers.SecurityStampValidator;
+
+#endregion
 
 namespace City_Easter_Eggs
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			var builder = WebApplication.CreateBuilder(args);
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            ApplicationDbContext.SetupDatabase(builder);
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-			builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-				{
-					options.SignIn.RequireConfirmedAccount = true;
-					options.SignIn.RequireConfirmedPhoneNumber = false;
-					options.SignIn.RequireConfirmedEmail = false;
-					options.Password.RequireDigit = false;
-					options.Password.RequireLowercase = false;
-					options.Password.RequireUppercase = false;
-					options.Password.RequireNonAlphanumeric = false;
+            builder.Services.AddAuthentication(o =>
+            {
+                o.DefaultScheme = IdentityConstants.ApplicationScheme;
+                o.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+            }).AddIdentityCookies(o => { });
+            builder.Services.AddScoped<ISecurityStampValidator, SecurityStampValidator>();
 
-                    options.User.AllowedUserNameCharacters =
-						"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                    options.User.RequireUniqueEmail = true;
-                }
-			).AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<UserController>();
+            builder.Services.AddScoped<MapsController>();
 
+            builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));
             builder.Services.AddRazorPages();
 
-			var app = builder.Build();
+            var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
             }
             else
-			{
-				app.UseExceptionHandler("/Error");
-				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-				app.UseHsts();
-			}
+            {
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
-			app.UseHttpsRedirection();
-			app.UseStaticFiles();
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
-			app.UseRouting();
+            app.UseRouting();
 
-			app.UseAuthorization();
+            app.UseAuthorization();
 
-			app.MapRazorPages();
+            app.MapRazorPages();
             //app.MapControllers();
 
             app.MapDefaultControllerRoute();
 
             app.Run();
-		}
-	}
+        }
+    }
 }

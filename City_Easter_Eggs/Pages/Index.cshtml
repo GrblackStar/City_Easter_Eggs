@@ -1,96 +1,94 @@
 ﻿@page
+@using City_Easter_Eggs.Controllers
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+	ViewData["Title"] = "Home page";
 }
+@inject MapsController MapService;
 
 <html>
 <head>
-    <title></title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <style type="text/css">
+	<title></title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+	<meta charset="utf-8">
+	<style type="text/css">
         html, body, #map {
             height: 100%;
             margin: 0px;
             padding: 0px
         }
     </style>
-    
-    <script type="module">
+
+	<script type="module">
+        // Request needed libraries.
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
         let map;
+        let infoWindow = null; // https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers
 
+        function AddMarkerToMap(position, name)
+        {
+            // Create an info window to share between markers.
+            if (infoWindow == null) infoWindow = new InfoWindow();
 
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
-        };
+            const marker = new AdvancedMarkerElement({
+                map: map,
+                position: position,
+                title: name,
+            });
 
-        function error(err) {
-            console.warn(`ERROR(${err.code}): ${err.message}`);
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener('click', ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
         }
-
-        async function getPosition() {
-            return new Promise((onDoneFunc) => {
-                navigator.geolocation.getCurrentPosition(onDoneFunc, error, options);
-            })
-        }
-
-        
 
         async function initMap() {
-            // Request needed libraries.
-            const { Map } = await google.maps.importLibrary("maps");
-            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-
             // get the current position of the device
-            var myPos = await getPosition();
+            var myPos = await GetUserLocation();
             var position = { lat: myPos.coords.latitude, lng: myPos.coords.longitude };
 
             // The map, centered at the current position
             map = new Map(document.getElementById("map"), {
-                zoom: 4,
+                zoom: 80,
                 center: position,
                 mapId: "DEMO_MAP_ID",
+                mapTypeId: google.maps.MapTypeId.SATELLITE,
+
+                zoomControl: true,
+                mapTypeControl: false,
+                scaleControl: true,
+                streetViewControl: true,
+                rotateControl: false,
+                fullscreenControl: false
             });
 
-            // The marker, positioned at the current location
-            const marker = new AdvancedMarkerElement({
-                map: map,
-                position: position,
-                title: "Current Location",
-            });
+            AddMarkerToMap(position, "Current Location");
+
+            let pointsFromBackend = await HttpGet("/Points/GetPoints");
+            pointsFromBackend = JSON.parse(pointsFromBackend);
+
+            for (let i = 0; i < pointsFromBackend.length; i++) {
+                const thisPoint = pointsFromBackend[i]
+                const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude }
+                AddMarkerToMap(posForGMaps, thisPoint.name)
+            }
         }
 
         initMap();
     </script>
-    
-    <script>
-
-
-        function httpGetAsync(theUrl, callback) {
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function () {
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-                    callback(xmlHttp.responseText);
-            }
-            xmlHttp.open("GET", theUrl, true); // true for asynchronous
-            xmlHttp.send(null);
-        }
-
-        function GetPoints() {
-            httpGetAsync("/Pepega/GetPoints", (responseText) => { console.log(responseText); });
-        }
-
-    </script>
 </head>
 <body>
-    <button style="height: 30px; width: 200px; margin-bottom: 20px" onclick="GetPoints()">Get Points</button>
-    <div style="height: 500px" id="map"></div>
-    <script>
+@* <button style="height: 30px; width: 200px; margin-bottom: 20px" onclick="GetPoints()">Get Points</button> *@
+<div style="height: 700px" id="map"></div>
+<script>
+        const apiKey = "@MapService.GetAPIKey()";
         (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
-            ({ key: "AIzaSyDFWemImQNqUQ9YZfeAwM7ziglqEiqRaSA", v: "weekly" });
+            ({ key: apiKey, v: "weekly" });
     </script>
 </body>
-</html> 
+</html>
