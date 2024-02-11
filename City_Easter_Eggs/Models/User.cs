@@ -18,11 +18,7 @@ namespace City_Easter_Eggs.Models
 
         public string Username { get; set; }
         public string UsernameNormalized { get; set; }
-
         public string? PasswordHash { get; set; }
-        public DateTimeOffset? LockoutEnd { get; set; }
-        public bool LockoutEnabled { get; set; }
-        public int AccessFailedCount { get; set; }
 
         #endregion
 

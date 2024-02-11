@@ -27,8 +27,9 @@ namespace City_Easter_Eggs
             builder.Services.AddScoped<ISecurityStampValidator, SecurityStampValidator>();
 
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<UserController>();
-            builder.Services.AddScoped<MapsController>();
+            builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<PointsService>();
+            builder.Services.AddScoped<MapsService>();
 
             builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));
             builder.Services.AddRazorPages();

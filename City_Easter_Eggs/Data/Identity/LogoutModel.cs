@@ -12,9 +12,9 @@ namespace City_Easter_Eggs.Data.Identity
     [AllowAnonymous]
     public class LogoutModel : PageModel
     {
-        private readonly UserController _userManager;
+        private readonly UserService _userManager;
 
-        public LogoutModel(UserController userManager)
+        public LogoutModel(UserService userManager)
         {
             _userManager = userManager;
         }

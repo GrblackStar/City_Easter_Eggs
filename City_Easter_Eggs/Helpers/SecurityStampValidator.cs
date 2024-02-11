@@ -13,11 +13,11 @@ namespace City_Easter_Eggs.Helpers;
 // Copy from ASPNetCore.Identity with support for custom user controller.
 public class SecurityStampValidator : ISecurityStampValidator
 {
-    private UserController _userController;
+    private UserService _userController;
     private SecurityStampValidatorOptions _options;
     private TimeProvider _timeProvider;
 
-    public SecurityStampValidator(UserController userController)
+    public SecurityStampValidator(UserService userController)
     {
         _userController = userController;
         _options = new SecurityStampValidatorOptions();

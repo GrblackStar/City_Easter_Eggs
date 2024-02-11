@@ -13,8 +13,8 @@ namespace City_Easter_Eggs.Models
 
         public string Name { get; set; } = "Untitled";
         public string Description { get; set; } = "No Description";
-        public int Longitude { get; set; }
-        public int Latitude { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
         public long TimeStamp { get; set; }
 
         public User Creator { get; set; }

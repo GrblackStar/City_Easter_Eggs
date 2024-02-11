@@ -12,13 +12,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace City_Easter_Eggs.Controllers
 {
-    public class UserController
+    public class UserService
     {
         private ApplicationDbContext _db;
         private PasswordHasher _hasher;
         private IHttpContextAccessor _httpContextAccessor;
 
-        public UserController(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
+        public UserService(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;

@@ -45,7 +45,7 @@ namespace City_Easter_Eggs.Data
 				dbContext.Database.Migrate();
 
 				// Initial debug data
-				if (!dbContext.POIs.Any())
+				/*if (!dbContext.POIs.Any())
 				{
 					var systemUser = new User("SystemUser");
 					dbContext.Users.Add(systemUser);
@@ -64,7 +64,7 @@ namespace City_Easter_Eggs.Data
 							});
 						}
 					}
-				}
+				}*/
 
 				dbContext.SaveChanges();
 				dbContext.Dispose();

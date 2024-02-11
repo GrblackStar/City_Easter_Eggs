@@ -4,7 +4,7 @@
 @{
 	ViewData["Title"] = "Home page";
 }
-@inject MapsController MapService;
+@inject MapsService MapService;
 
 <html>
 <head>
@@ -83,7 +83,7 @@
     </script>
 </head>
 <body>
-@* <button style="height: 30px; width: 200px; margin-bottom: 20px" onclick="GetPoints()">Get Points</button> *@
+    <a asp-page="/CreatePointPage" style="margin-bottom: 20px" class="btn btn-primary">Add New Point</a>
 <div style="height: 700px" id="map"></div>
 <script>
         const apiKey = "@MapService.GetAPIKey()";

@@ -23,9 +23,9 @@ namespace City_Easter_Eggs.Data.Identity
 
         public string? ReturnUrl { get; set; }
 
-        private readonly UserController _userManager;
+        private readonly UserService _userManager;
 
-        public LoginModel(UserController userManager)
+        public LoginModel(UserService userManager)
         {
             _userManager = userManager;
         }

@@ -1,6 +1,5 @@
 #region Using
 
-using City_Easter_Eggs.Data;
 using City_Easter_Eggs.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,17 +12,17 @@ namespace City_Easter_Eggs.Controllers
     public class PointsController : ControllerBase
     {
         private readonly ILogger<PointsController> _logger;
-        private readonly ApplicationDbContext _context;
+        private readonly PointsService _service;
 
-        public PointsController(ILogger<PointsController> logger, ApplicationDbContext context)
+        public PointsController(ILogger<PointsController> logger, PointsService service)
         {
             _logger = logger;
-            _context = context;
+            _service = service;
         }
 
         public IEnumerable<PointOfInterest> GetPoints()
         {
-            return _context.POIs;
+            return _service.GetPoints();
         }
     }
 }

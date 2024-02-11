@@ -1,10 +1,10 @@
 ﻿namespace City_Easter_Eggs.Controllers
 {
-    public class MapsController
+    public class MapsService
     {
         private string _apiKey;
 
-        public MapsController(IConfiguration config)
+        public MapsService(IConfiguration config)
         {
             IConfigurationSection mapConfig = config.GetSection("Maps");
             _apiKey = mapConfig["APIKey"] ?? "";

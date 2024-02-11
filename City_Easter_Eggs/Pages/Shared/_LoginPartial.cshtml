@@ -1,6 +1,6 @@
 ﻿@using City_Easter_Eggs.Controllers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@inject UserController UserManager
+@inject UserService UserManager
 
 <ul class="navbar-nav">
 	@if (UserManager.IsSignedIn(User))

@@ -25,3 +25,40 @@ async function HttpGet(theUrl) {
         xmlHttp.send(null);
     });
 }
+
+async function CreatePointSubmit() {
+    // get the current position of the device
+    var myPos = await GetUserLocation();
+
+    console.log(typeof myPos.coords.longitude); // Check the type
+    console.log(myPos.coords.longitude); // Check the value
+
+    document.getElementById('userLocationLongitude').value = myPos.coords.longitude;
+    document.getElementById('userLocationLatitude').value = myPos.coords.latitude;
+
+    console.log("Submitting form...");
+    // Once location is set, submit the form
+    //document.getElementById('createPointForm').submit();
+}
+
+
+
+$(async function () {
+    // Run on submit point page only.
+    if ($('form#createPointForm').length == 0) return;
+
+    var locationGotten = false;
+
+    $("#loadingText").show();
+    $("#createPointSubmit").prop('disabled', true);
+
+    $('form#createPointForm').submit(function (e) {
+        if (!locationGotten) e.preventDefault();
+    })
+
+    await CreatePointSubmit();
+    locationGotten = true;
+
+    $("#loadingText").hide();
+    $("#createPointSubmit").prop('disabled', false);
+});
