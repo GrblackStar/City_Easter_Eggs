@@ -12,61 +12,30 @@
     <link rel="stylesheet" href="~/css/styles.css">
 </head>
 <body>
-    <script>
-        
-    </script>
-    
-    <div class="row">
-        <div class="col-md-6 mx-auto">
-            <form>
-                <div class="mb-3">
-                    <label for="locationName" class="form-label">Location name</label>
-                    <span>
-                        <label class="text-danger" style="font-size: 12px">* Required</label>
-                    </span>
-                    <input type="text" class="form-control" id="locationName" placeholder="Name" />
-                </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" placeholder="Description" rows="5"></textarea>
-                </div>
-                <div class="mb-3"></div>
-                <div class="mb-3 d-flex justify-content-between">
-                    <button id="addPointDone" type="button" class="btn btn-primary" onclick="HandleSubmitPoint()">Done</button>
-                    <button id="addPointCancel" type="submit" class="btn btn-secondary">Cancel</button>
-                </div>
-                <div class="mb-3">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <button id="addPointDone" type="submit" class="w-100 btn btn-primary">Done</button>
-                        </div>
-                        <div class="col-md-3 md-offset-2">
-                            <button id="addPointCancel" type="submit" class="w-100 btn btn-primary">Cancel</button>
-                        </div>
-                    </div>
-                </div> 
-            </form>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-md-6 mx-auto">
             <form id="createPointForm" method="post" >
                 <input asp-for="Input.UserLocationLongitude" type="hidden" id="userLocationLongitude" />
                 <input asp-for="Input.UserLocationLatitude" type="hidden" id="userLocationLatitude" />
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Name" class="form-control" aria-required="true" placeholder="Name" />
-                    <label asp-for="Input.Name" class="form-label">Name</label>
+                <div class="mb-3">
+                    <label for="locationName" class="form-label">Location name</label>
+                    <span>
+                        <label class="text-danger" style="font-size: 12px">* Required</label>
+                    </span>
+                    <input asp-for="Input.Name" type="text" class="form-control" aria-required="true" placeholder="Name" />
                     <span asp-validation-for="Input.Name" class="text-danger"></span>
                 </div>
-                <div class="form-floating mb-3">
-                    <textarea asp-for="Input.Description" class="form-control" placeholder="Description" rows="5"></textarea>
+                <div class="mb-3">
                     <label asp-for="Input.Description" class="form-label">Description</label>
+                    <textarea asp-for="Input.Description" class="form-control" placeholder="Description" rows="5"></textarea>
                     <span asp-validation-for="Input.Description" class="text-danger"></span>
                 </div>
                 <span id="loadingText">Loading..</span>
-                <button id="createPointSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Create Point</button>
+                <div class="mb-3 d-flex justify-content-between">
+                    <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
+                    <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px" onclick="window.location.href='/Index';">Cancel</button>
+                </div>
             </form>
         </div>
     </div>
