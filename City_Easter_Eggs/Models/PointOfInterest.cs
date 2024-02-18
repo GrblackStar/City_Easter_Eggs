@@ -22,8 +22,9 @@ namespace City_Easter_Eggs.Models
 
         public PointOfInterest()
         {
-            PointId = new Guid().ToString();
+            PointId = Guid.NewGuid().ToString();
             TimeStamp = (long) DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds;
+            Likes = 0;
         }
     }
 }
