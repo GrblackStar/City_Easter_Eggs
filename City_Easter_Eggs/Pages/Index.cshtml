@@ -32,10 +32,16 @@
             // Create an info window to share between markers.
             if (infoWindow == null) infoWindow = new InfoWindow();
 
+            const normalEggImage = document.createElement("img");
+            normalEggImage.src = "/NormalEgg.png";
+            normalEggImage.width = 28;
+            normalEggImage.height = 28;
+
             const marker = new AdvancedMarkerElement({
                 map: map,
                 position: position,
                 title: name,
+                content: normalEggImage,
             });
 
             // Add a click listener for each marker, and set up the info window.
