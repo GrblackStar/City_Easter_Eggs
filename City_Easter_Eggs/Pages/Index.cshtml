@@ -83,6 +83,161 @@
                 const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude }
                 AddMarkerToMap(posForGMaps, thisPoint.name)
             }
+
+            // map.addListener('click', function (e) {
+            //     // Add a marker at the clicked location
+            //     AddMarkerToMap(e.latLng, "Clicked Location");
+
+            //     // Log the latitude and longitude of the clicked location
+            //     console.log("Latitude: " + e.latLng.lat() + ", Longitude: " + e.latLng.lng());
+            // });
+
+
+            // map.addListener('click', function (e) {
+            //     // Create a form for the popup
+            //     const form = document.createElement('form');
+            //     form.innerHTML = `
+            //         <label for="lat">Latitude:</label><br>
+            //         <input type="text" id="lat" name="lat" value="${e.latLng.lat()}"><br>
+            //         <label for="lng">Longitude:</label><br>
+            //         <input type="text" id="lng" name="lng" value="${e.latLng.lng()}"><br>
+            //         <input type="submit" value="Save">
+            //     `;
+
+            //     // When the form is submitted, log the input values and prevent the form from being submitted
+            //     form.addEventListener('submit', function (event) {
+            //         event.preventDefault();
+            //         console.log("Latitude: " + this.lat.value + ", Longitude: " + this.lng.value);
+            //     });
+
+            //     // If an info window already exists, close it
+            //     if (infoWindow) {
+            //         infoWindow.close();
+            //     }
+
+            //     // Create a new info window with the form as its content
+            //     infoWindow = new InfoWindow({
+            //         content: form
+            //     });
+
+            //     // Open the info window at the clicked location
+            //     infoWindow.setPosition(e.latLng);
+            //     infoWindow.open(map);
+            // });
+
+
+            map.addListener('click', function (e) {
+                // Create a form for the popup
+                //const form = document.createElement('form');
+                // form.innerHTML = `
+                //     <label for="name">Location name:</label><br>
+                //     <input type="text" id="name" name="name" required><br>
+                //     <label for="description">Description:</label><br>
+                //     <textarea id="description" name="description" rows="5"></textarea><br>
+                //     <label for="lat">Latitude:</label><br>
+                //     <input type="text" id="lat" name="lat" value="${e.latLng.lat()}"><br>
+                //     <label for="lng">Longitude:</label><br>
+                //     <input type="text" id="lng" name="lng" value="${e.latLng.lng()}"><br>
+                //     <input type="submit" value="Create Point">
+                // `;
+
+                const form = document.createElement('form');
+                form.id = "createPointForm";
+                form.method = "post";
+                form.innerHTML = `
+                    <style>
+                        #createPointForm {
+                            width: 300px;
+                        }
+                        #createPointForm button {
+                            padding: 7px 20px;
+                            font-size: 14px;
+                            height: 35px;
+                        }
+                    </style>
+                    <input type="hidden" id="userLocationLongitude" name="UserLocationLongitude" value="${e.latLng.lng()}">
+                    <input type="hidden" id="userLocationLatitude" name="UserLocationLatitude" value="${e.latLng.lat()}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Location name</label>
+                        <span>
+                            <label class="text-danger" style="font-size: 12px">* Required</label>
+                        </span>
+                        <input type="text" id="name" name="Name" class="form-control" required placeholder="Name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea id="description" name="Description" class="form-control" placeholder="Description" rows="5"></textarea>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
+                        <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px">Cancel</button>
+                    </div>
+                `;
+
+                // // Create a close button
+                // const closeButton = document.createElement('button');
+                // closeButton.innerHTML = 'X';
+                // closeButton.style.fontSize = '20px'; // Adjust the size of the "X"
+                // closeButton.style.float = 'right';
+
+                // // When the close button is clicked, close the info window
+                // closeButton.addEventListener('click', function () {
+                //     infoWindow.close();
+                // });
+
+                // // Add the close button to the form
+                // form.prepend(closeButton);
+
+                // When the form is submitted, send a POST request to the server with the form data
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const data = {
+                        Name: this.name.value,
+                        Description: this.description.value,
+                        UserLocationLongitude: this.lng.value,
+                        UserLocationLatitude: this.lat.value
+                    };
+
+                    fetch('/CreatePointPageModel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    }).then(response => {
+                        if (response.ok) {
+                            console.log('Point created successfully');
+                        } else {
+                            console.log('Error: ' + response.statusText);
+                        }
+                    });
+                });
+
+                // If an info window already exists, close it
+                if (infoWindow) {
+                    infoWindow.close();
+                }
+
+                // Create a new info window with the form as its content
+                infoWindow = new InfoWindow({
+                    content: form
+                });
+
+                // Open the info window at the clicked location
+                infoWindow.setPosition(e.latLng);
+                infoWindow.open(map);
+
+                // Event listener to the close button of the info window to close it. 
+                // Using "domready" ensures that the dom is loaded and can find the component
+                google.maps.event.addListener(infoWindow, 'domready', function() {
+                    document.getElementById('createPointCancel').addEventListener('click', function () {
+                        infoWindow.close();
+                    });
+                });
+            });
+
+
         }
 
         initMap();
@@ -90,7 +245,7 @@
 </head>
 <body>
     <a asp-page="/CreatePointPage" style="margin-bottom: 20px" class="btn btn-primary">Add New Point</a>
-<div style="height: 700px" id="map"></div>
+    <div style="height: 700px" id="map"></div>
 <script>
         const apiKey = "@MapService.GetAPIKey()";
         (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
