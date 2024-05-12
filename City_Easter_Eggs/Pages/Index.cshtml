@@ -26,6 +26,7 @@
 
         let map;
         let infoWindow = null; // https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers
+        var markers = [];
 
         function AddMarkerToMap(position, name)
         {
@@ -43,6 +44,7 @@
                 title: name,
                 content: normalEggImage,
             });
+            markers.push(marker);
 
             // Add a click listener for each marker, and set up the info window.
             marker.addListener('click', ({ domEvent, latLng }) => {
@@ -51,6 +53,24 @@
                 infoWindow.setContent(marker.title);
                 infoWindow.open(marker.map, marker);
             });
+        }
+
+        async function drawPoints() {
+            let pointsFromBackend = await HttpGet("/Points/GetPoints");
+            pointsFromBackend = JSON.parse(pointsFromBackend);
+
+            for (let i = 0; i < pointsFromBackend.length; i++) {
+                const thisPoint = pointsFromBackend[i]
+                const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude }
+                AddMarkerToMap(posForGMaps, thisPoint.name)
+            }
+        }
+
+        function removePointsMarker() {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+            }
+            markers = [];
         }
 
         async function initMap() {
@@ -74,76 +94,11 @@
             });
 
             AddMarkerToMap(position, "Current Location");
-
-            let pointsFromBackend = await HttpGet("/Points/GetPoints");
-            pointsFromBackend = JSON.parse(pointsFromBackend);
-
-            for (let i = 0; i < pointsFromBackend.length; i++) {
-                const thisPoint = pointsFromBackend[i]
-                const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude }
-                AddMarkerToMap(posForGMaps, thisPoint.name)
-            }
-
-            // map.addListener('click', function (e) {
-            //     // Add a marker at the clicked location
-            //     AddMarkerToMap(e.latLng, "Clicked Location");
-
-            //     // Log the latitude and longitude of the clicked location
-            //     console.log("Latitude: " + e.latLng.lat() + ", Longitude: " + e.latLng.lng());
-            // });
-
-
-            // map.addListener('click', function (e) {
-            //     // Create a form for the popup
-            //     const form = document.createElement('form');
-            //     form.innerHTML = `
-            //         <label for="lat">Latitude:</label><br>
-            //         <input type="text" id="lat" name="lat" value="${e.latLng.lat()}"><br>
-            //         <label for="lng">Longitude:</label><br>
-            //         <input type="text" id="lng" name="lng" value="${e.latLng.lng()}"><br>
-            //         <input type="submit" value="Save">
-            //     `;
-
-            //     // When the form is submitted, log the input values and prevent the form from being submitted
-            //     form.addEventListener('submit', function (event) {
-            //         event.preventDefault();
-            //         console.log("Latitude: " + this.lat.value + ", Longitude: " + this.lng.value);
-            //     });
-
-            //     // If an info window already exists, close it
-            //     if (infoWindow) {
-            //         infoWindow.close();
-            //     }
-
-            //     // Create a new info window with the form as its content
-            //     infoWindow = new InfoWindow({
-            //         content: form
-            //     });
-
-            //     // Open the info window at the clicked location
-            //     infoWindow.setPosition(e.latLng);
-            //     infoWindow.open(map);
-            // });
-
+            drawPoints();
 
             map.addListener('click', function (e) {
-                // Create a form for the popup
-                //const form = document.createElement('form');
-                // form.innerHTML = `
-                //     <label for="name">Location name:</label><br>
-                //     <input type="text" id="name" name="name" required><br>
-                //     <label for="description">Description:</label><br>
-                //     <textarea id="description" name="description" rows="5"></textarea><br>
-                //     <label for="lat">Latitude:</label><br>
-                //     <input type="text" id="lat" name="lat" value="${e.latLng.lat()}"><br>
-                //     <label for="lng">Longitude:</label><br>
-                //     <input type="text" id="lng" name="lng" value="${e.latLng.lng()}"><br>
-                //     <input type="submit" value="Create Point">
-                // `;
-
                 const form = document.createElement('form');
                 form.id = "createPointForm";
-                form.method = "post";
                 form.innerHTML = `
                     <style>
                         #createPointForm {
@@ -154,9 +109,17 @@
                             font-size: 14px;
                             height: 35px;
                         }
+                        #mainText {
+                            font-size: 16px;
+                            padding-bottom: 10px;
+                            font-weight: bold;
+                        }
                     </style>
                     <input type="hidden" id="userLocationLongitude" name="UserLocationLongitude" value="${e.latLng.lng()}">
                     <input type="hidden" id="userLocationLatitude" name="UserLocationLatitude" value="${e.latLng.lat()}">
+                    <div>
+                        <label id="mainText" for="name" class="form-label">ADD A POINT</label>
+                    </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Location name</label>
                         <span>
@@ -174,42 +137,29 @@
                     </div>
                 `;
 
-                // // Create a close button
-                // const closeButton = document.createElement('button');
-                // closeButton.innerHTML = 'X';
-                // closeButton.style.fontSize = '20px'; // Adjust the size of the "X"
-                // closeButton.style.float = 'right';
-
-                // // When the close button is clicked, close the info window
-                // closeButton.addEventListener('click', function () {
-                //     infoWindow.close();
-                // });
-
-                // // Add the close button to the form
-                // form.prepend(closeButton);
-
-                // When the form is submitted, send a POST request to the server with the form data
                 form.addEventListener('submit', function (event) {
                     event.preventDefault();
 
-                    const data = {
-                        Name: this.name.value,
-                        Description: this.description.value,
-                        UserLocationLongitude: this.lng.value,
-                        UserLocationLatitude: this.lat.value
-                    };
+                    var formData = new FormData(form);
+                    var object = {};
+                    formData.forEach((value, key) => object[key] = value);
+                    var json = JSON.stringify(object);
 
-                    fetch('/CreatePointPageModel', {
+                    fetch('/Points/CreatePoint', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(data)
+                        body: json,
                     }).then(response => {
                         if (response.ok) {
-                            console.log('Point created successfully');
+                            //console.log('Point created successfully');
+                            infoWindow.close();
+                            //initMap();
+                            removePointsMarker();
+                            drawPoints();
                         } else {
-                            console.log('Error: ' + response.statusText);
+                            response.json().then(x => x.errors);
                         }
                     });
                 });
@@ -235,6 +185,36 @@
                         infoWindow.close();
                     });
                 });
+
+                // google.maps.event.addListener(infoWindow, 'domready', function() {
+                // Add an event listener to the Create Point button
+                // document.getElementById('createPointSubmit').addEventListener('click', async function (e) {
+                //     e.preventDefault();
+
+                //     // Get the form data
+                //     const formData = new FormData(document.getElementById('createPointForm'));
+
+                //     // Make an HTTP POST request to the server
+                //     const response = await fetch('/CreatePointPage', {
+                //         method: 'POST',
+                //         body: formData
+                //     });
+
+                //     // Handle the response
+                //     if (response.ok) {
+                //         // The point was successfully created
+                //         const point = await response.json();
+                //         const posForGMaps = { lat: point.latitude, lng: point.longitude };
+                //         AddMarkerToMap(posForGMaps, point.name);
+                //         infoWindow.close();
+                //     } else {
+                //         // There was an error creating the point
+                //         console.error('Error creating point:', response.statusText);
+                //     }
+                // });
+                // });
+
+
             });
 
 
@@ -244,7 +224,6 @@
     </script>
 </head>
 <body>
-    <a asp-page="/CreatePointPage" style="margin-bottom: 20px" class="btn btn-primary">Add New Point</a>
     <div style="height: 700px" id="map"></div>
 <script>
         const apiKey = "@MapService.GetAPIKey()";

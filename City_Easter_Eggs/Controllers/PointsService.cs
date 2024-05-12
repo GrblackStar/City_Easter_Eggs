@@ -13,7 +13,7 @@ namespace City_Easter_Eggs.Controllers
         private IHttpContextAccessor _httpContextAccessor;
         private UserService _userService;
 
-        public PointsService(ILogger<PointsController> logger, ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, UserService userService)
+        public PointsService(ILogger<PointsService> logger, ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, UserService userService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;

@@ -1,7 +1,14 @@
 #region Using
 
 using City_Easter_Eggs.Models;
+using City_Easter_Eggs.Pages;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Mime;
 
 #endregion
 
@@ -23,6 +30,28 @@ namespace City_Easter_Eggs.Controllers
         public IEnumerable<PointOfInterest> GetPoints()
         {
             return _service.GetPoints();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePoint(CreatePointInputModel input)
+        {
+            await _service.CreatePointAsync(input.Name, input.Description, input.UserLocationLongitude, input.UserLocationLatitude);
+
+            //return RedirectToPage("/Index");
+            return Ok();
+        }
+
+        public class CreatePointInputModel
+        {
+            [Required(ErrorMessage = "Name is required")]
+            [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 3)]
+            public string Name { get; set; }
+
+            [StringLength(250, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 0)]
+            public string? Description { get; set; }
+
+            public double UserLocationLongitude { get; set; }
+            public double UserLocationLatitude { get; set; }
         }
     }
 }
