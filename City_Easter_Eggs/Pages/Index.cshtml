@@ -26,7 +26,8 @@
 
         let map;
         let infoWindow = null; // https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers
-        var markers = [];
+        var oldMarkers = [];
+        var newMarkers = [];
 
         function AddMarkerToMap(position, name)
         {
@@ -44,7 +45,7 @@
                 title: name,
                 content: normalEggImage,
             });
-            markers.push(marker);
+            newMarkers.push(marker);
 
             // Add a click listener for each marker, and set up the info window.
             marker.addListener('click', ({ domEvent, latLng }) => {
@@ -64,14 +65,20 @@
                 const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude }
                 AddMarkerToMap(posForGMaps, thisPoint.name)
             }
+            // Remove old markers after drawing new ones and swap the arrays for the next draw
+            removeOldMarkers();
+            oldMarkers = newMarkers;
+            newMarkers = [];
         }
 
-        function removePointsMarker() {
-            for (var i = 0; i < markers.length; i++) {
-                markers[i].setMap(null);
+        function removeOldMarkers() {
+            for (var i = 0; i < oldMarkers.length; i++) {
+                oldMarkers[i].setMap(null);
             }
-            markers = [];
+            oldMarkers = [];
         }
+
+
 
         async function initMap() {
             // get the current position of the device
@@ -155,8 +162,6 @@
                         if (response.ok) {
                             //console.log('Point created successfully');
                             infoWindow.close();
-                            //initMap();
-                            removePointsMarker();
                             drawPoints();
                         } else {
                             response.json().then(x => x.errors);
@@ -185,34 +190,6 @@
                         infoWindow.close();
                     });
                 });
-
-                // google.maps.event.addListener(infoWindow, 'domready', function() {
-                // Add an event listener to the Create Point button
-                // document.getElementById('createPointSubmit').addEventListener('click', async function (e) {
-                //     e.preventDefault();
-
-                //     // Get the form data
-                //     const formData = new FormData(document.getElementById('createPointForm'));
-
-                //     // Make an HTTP POST request to the server
-                //     const response = await fetch('/CreatePointPage', {
-                //         method: 'POST',
-                //         body: formData
-                //     });
-
-                //     // Handle the response
-                //     if (response.ok) {
-                //         // The point was successfully created
-                //         const point = await response.json();
-                //         const posForGMaps = { lat: point.latitude, lng: point.longitude };
-                //         AddMarkerToMap(posForGMaps, point.name);
-                //         infoWindow.close();
-                //     } else {
-                //         // There was an error creating the point
-                //         console.error('Error creating point:', response.statusText);
-                //     }
-                // });
-                // });
 
 
             });
