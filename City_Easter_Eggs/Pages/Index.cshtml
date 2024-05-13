@@ -54,6 +54,8 @@
                 infoWindow.setContent(marker.title);
                 infoWindow.open(marker.map, marker);
             });
+
+            return marker;
         }
 
         async function drawPoints() {
@@ -78,17 +80,92 @@
             oldMarkers = [];
         }
 
+        let userMarker = null;
+        var watchID;
+        var geoLoc;
+        let lastPos = null;
 
+        function GetPosDist(pointA, pointB)
+        {
+            var a = pointA.lat - pointB.lat;
+            var b = pointA.lng - pointB.lng;
+
+            return Math.sqrt(a * a + b * b);
+        }
+
+        function showLocation(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            var pos = { lat: latitude, lng: longitude };
+
+            if (lastPos != null)
+            {
+                var dist = GetPosDist(lastPos, pos);
+                console.log(dist);
+                if (dist < 0.001) return;
+            }
+            lastPos = pos;
+
+            // If the user marker doesn't exist, create it.
+            if (userMarker == null)
+            {
+                userMarker = AddMarkerToMap(pos, "Current Location");
+                userMarker.optimized = false;
+                userMarker.zIndex = 99999999;
+            }
+            else
+            {
+                // If it does exist, update its position.
+                userMarker.position = pos;
+            }
+
+            const center = new google.maps.LatLng(latitude, longitude);
+            map.panTo(center);
+
+            console.log("Latitude : " + latitude + " Longitude: " + longitude);
+        }
+
+        async function updateLocation() {
+            if (navigator.geolocation) {
+                let position = await GetUserLocation();
+                showLocation(position);
+            } else {
+                alert("Sorry, browser does not support geolocation!");
+            }
+            setTimeout(updateLocation, 2000)
+        }
+
+        function errorHandler(err) {
+            if (err.code == 1) {
+                alert("Error: Access is denied!");
+            } else if (err.code == 2) {
+                alert("Error: Position is unavailable!");
+            }
+        }
+
+        // function errorHandler(err) {
+        //     if (err.code == 1) {
+        //         alert("Error: Access to position is denied!");
+        //     } else if (err.code == 2) {
+        //         alert("Error: Position is unavailable!");
+        //     }
+        // }
+
+        // function getLocationUpdate() {
+        //     if (navigator.geolocation) {
+        //         // timeout at 60000 milliseconds (60 seconds)
+        //         var options = { timeout: 60000 };
+        //         geoLoc = navigator.geolocation;
+        //         watchID = geoLoc.watchPosition(showLocation, errorHandler, options);
+        //     } else {
+        //         alert("Sorry, browser does not support geolocation!");
+        //     }
+        // }
 
         async function initMap() {
-            // get the current position of the device
-            var myPos = await GetUserLocation();
-            var position = { lat: myPos.coords.latitude, lng: myPos.coords.longitude };
-
             // The map, centered at the current position
             map = new Map(document.getElementById("map"), {
                 zoom: 80,
-                center: position,
                 mapId: "DEMO_MAP_ID",
                 mapTypeId: google.maps.MapTypeId.SATELLITE,
 
@@ -97,10 +174,10 @@
                 scaleControl: true,
                 streetViewControl: true,
                 rotateControl: false,
-                fullscreenControl: false
+                fullscreenControl: false,
+                gestureHandling: "greedy"
             });
 
-            AddMarkerToMap(position, "Current Location");
             drawPoints();
 
             map.addListener('click', function (e) {
@@ -186,7 +263,9 @@
                 // Event listener to the close button of the info window to close it. 
                 // Using "domready" ensures that the dom is loaded and can find the component
                 google.maps.event.addListener(infoWindow, 'domready', function() {
-                    document.getElementById('createPointCancel').addEventListener('click', function () {
+                    var cancelButton = document.getElementById('createPointCancel');
+                    if (!cancelButton) return;
+                    cancelButton.addEventListener('click', function () {
                         infoWindow.close();
                     });
                 });
@@ -198,6 +277,7 @@
         }
 
         initMap();
+        updateLocation();
     </script>
 </head>
 <body>
