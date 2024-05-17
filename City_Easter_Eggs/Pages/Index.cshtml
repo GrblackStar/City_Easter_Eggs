@@ -120,8 +120,8 @@
                 userMarker.position = pos;
             }
 
-            const center = new google.maps.LatLng(latitude, longitude);
-            map.panTo(center);
+            //const center = new google.maps.LatLng(latitude, longitude);
+            //map.panTo(center);
 
             console.log("Latitude : " + latitude + " Longitude: " + longitude);
         }
@@ -146,11 +146,13 @@
 
         async function initMap() {
             // The map, centered at the current position
+            var myPos = await GetUserLocation();
+            var position = { lat: myPos.coords.latitude, lng: myPos.coords.longitude };
             map = new Map(document.getElementById("map"), {
                 zoom: 80,
                 mapId: "DEMO_MAP_ID",
                 mapTypeId: google.maps.MapTypeId.SATELLITE,
-
+                center: position,
                 zoomControl: true,
                 mapTypeControl: false,
                 scaleControl: true,
