@@ -2,16 +2,16 @@
 @using City_Easter_Eggs.Controllers
 @model IndexModel
 @{
-	ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home page";
 }
 @inject MapsService MapService;
 
 <html>
 <head>
-	<title></title>
-	<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-	<meta charset="utf-8">
-	<style type="text/css">
+    <title></title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style type="text/css">
         html, body, #map {
             height: 100%;
             margin: 0px;
@@ -19,7 +19,7 @@
         }
     </style>
 
-	<script type="module">
+    <script type="module">
         // Request needed libraries.
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
@@ -29,8 +29,7 @@
         var oldMarkers = [];
         var newMarkers = [];
 
-        function AddMarkerToMap(position, name, isUser)
-        {
+        function AddMarkerToMap(position, name, isUser) {
             // Create an info window to share between markers.
             if (infoWindow == null) infoWindow = new InfoWindow();
 
@@ -86,8 +85,7 @@
         var geoLoc;
         let lastPos = null;
 
-        function GetPosDist(pointA, pointB)
-        {
+        function GetPosDist(pointA, pointB) {
             var a = pointA.lat - pointB.lat;
             var b = pointA.lng - pointB.lng;
 
@@ -99,8 +97,7 @@
             var longitude = position.coords.longitude;
             var pos = { lat: latitude, lng: longitude };
 
-            if (lastPos != null)
-            {
+            if (lastPos != null) {
                 var dist = GetPosDist(lastPos, pos);
                 console.log(dist);
                 if (dist < 0.001) return;
@@ -108,14 +105,12 @@
             lastPos = pos;
 
             // If the user marker doesn't exist, create it.
-            if (userMarker == null)
-            {
+            if (userMarker == null) {
                 userMarker = AddMarkerToMap(pos, "Current Location", true);
                 userMarker.optimized = false;
                 userMarker.zIndex = 99999999;
             }
-            else
-            {
+            else {
                 // If it does exist, update its position.
                 userMarker.position = pos;
             }
@@ -188,6 +183,7 @@
                     <div>
                         <label id="mainText" for="name" class="form-label">ADD A POINT</label>
                     </div>
+                    <div id="createPointErrorContainer" class="text-danger mb-2" role="alert"></div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Location name</label>
                         <span>
@@ -225,39 +221,51 @@
                             infoWindow.close();
                             drawPoints();
                         } else {
-                            response.json().then(x => x.errors);
+                            response.json().then(x => {
+                                var errorContainer = $("#createPointForm").find("#createPointErrorContainer")
+                                errorContainer.empty()
+
+                                var errors = x.errors
+                                var errorKeys = Object.keys(errors);
+
+                                for (var i = 0; i < errorKeys.length; i++) {
+                                    var thisProp = errorKeys[i];
+                                    var array = errors[thisProp];
+                                    for (var ii = 0; ii < array.length; ii++) {
+                                        errorContainer.append($('<div>', {
+                                            text: array[ii]
+                                        }));
+                                    }
+                                }
+                            });
                         }
                     });
                 });
 
-                // If an info window already exists, close it
-                if (infoWindow) {
-                    infoWindow.close();
+                // If an info window already exists, reuse it
+                if (isInfoWindowOpen(infoWindow)) {
                 }
+                else {
+                    // Create a new info window with the form as its content
+                    infoWindow = new InfoWindow({
+                        content: form
+                    });
+                    infoWindow.open(map);
 
-                // Create a new info window with the form as its content
-                infoWindow = new InfoWindow({
-                    content: form
-                });
+                    // Event listener to the close button of the info window to close it.
+                    // Using "domready" ensures that the dom is loaded and can find the component
+                    google.maps.event.addListener(infoWindow, 'domready', function () {
+                        var cancelButton = document.getElementById('createPointCancel');
+                        if (!cancelButton) return;
+                        cancelButton.addEventListener('click', function () {
+                            infoWindow.close();
+                        });
+                    });
+                }
 
                 // Open the info window at the clicked location
                 infoWindow.setPosition(e.latLng);
-                infoWindow.open(map);
-
-                // Event listener to the close button of the info window to close it. 
-                // Using "domready" ensures that the dom is loaded and can find the component
-                google.maps.event.addListener(infoWindow, 'domready', function() {
-                    var cancelButton = document.getElementById('createPointCancel');
-                    if (!cancelButton) return;
-                    cancelButton.addEventListener('click', function () {
-                        infoWindow.close();
-                    });
-                });
-
-
             });
-
-
         }
 
         initMap();
@@ -266,10 +274,15 @@
 </head>
 <body>
     <div style="height: 700px" id="map"></div>
-<script>
+    <script>
         const apiKey = "@MapService.GetAPIKey()";
         (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
             ({ key: apiKey, v: "weekly" });
+
+        function isInfoWindowOpen(infoWindow) {
+            var map = infoWindow.getMap();
+            return (map !== null && typeof map !== "undefined");
+        }
     </script>
 </body>
 </html>
