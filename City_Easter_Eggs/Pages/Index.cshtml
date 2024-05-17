@@ -29,13 +29,14 @@
         var oldMarkers = [];
         var newMarkers = [];
 
-        function AddMarkerToMap(position, name)
+        function AddMarkerToMap(position, name, isUser)
         {
             // Create an info window to share between markers.
             if (infoWindow == null) infoWindow = new InfoWindow();
 
             const normalEggImage = document.createElement("img");
-            normalEggImage.src = "/NormalEgg.png";
+            if (isUser) normalEggImage.src = "/EasterEgg.png";
+            else normalEggImage.src = "/NormalEgg.png";
             normalEggImage.width = 28;
             normalEggImage.height = 28;
 
@@ -65,7 +66,7 @@
             for (let i = 0; i < pointsFromBackend.length; i++) {
                 const thisPoint = pointsFromBackend[i]
                 const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude }
-                AddMarkerToMap(posForGMaps, thisPoint.name)
+                AddMarkerToMap(posForGMaps, thisPoint.name, false)
             }
             // Remove old markers after drawing new ones and swap the arrays for the next draw
             removeOldMarkers();
@@ -109,7 +110,7 @@
             // If the user marker doesn't exist, create it.
             if (userMarker == null)
             {
-                userMarker = AddMarkerToMap(pos, "Current Location");
+                userMarker = AddMarkerToMap(pos, "Current Location", true);
                 userMarker.optimized = false;
                 userMarker.zIndex = 99999999;
             }
@@ -142,25 +143,6 @@
                 alert("Error: Position is unavailable!");
             }
         }
-
-        // function errorHandler(err) {
-        //     if (err.code == 1) {
-        //         alert("Error: Access to position is denied!");
-        //     } else if (err.code == 2) {
-        //         alert("Error: Position is unavailable!");
-        //     }
-        // }
-
-        // function getLocationUpdate() {
-        //     if (navigator.geolocation) {
-        //         // timeout at 60000 milliseconds (60 seconds)
-        //         var options = { timeout: 60000 };
-        //         geoLoc = navigator.geolocation;
-        //         watchID = geoLoc.watchPosition(showLocation, errorHandler, options);
-        //     } else {
-        //         alert("Sorry, browser does not support geolocation!");
-        //     }
-        // }
 
         async function initMap() {
             // The map, centered at the current position
