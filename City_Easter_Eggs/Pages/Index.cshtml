@@ -268,11 +268,19 @@
             });
         }
 
+        document.getElementById('centerButton').addEventListener('click', async function() {
+            if (map != null && lastPos != null) {
+                // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
+                map.panTo(lastPos);
+            }
+        });
+
         initMap();
         updateLocation();
     </script>
 </head>
 <body>
+    <button id="centerButton" style="padding: 10px; margin: 10px 0px 10px 0px;" class="btn btn-lg btn-primary">Back to my location</button>
     <div style="height: 700px" id="map"></div>
     <script>
         const apiKey = "@MapService.GetAPIKey()";
