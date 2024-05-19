@@ -25,7 +25,11 @@
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
         let map;
-        let infoWindow = null; // https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers
+        var panelPointInfo = null;
+        var panelPointInfo_CurrentMarker = null;
+        
+        // https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers
+        let panelCreatePoint = null;
         var oldMarkers = [];
         var newMarkers = [];
         var userMarker = null;
@@ -33,10 +37,8 @@
         var geoLoc;
         let lastPos = null;
 
-        function AddMarkerToMap(position, name, isUser, description = '') {
-            // Create an info window to share between markers.
-            if (infoWindow == null) infoWindow = new InfoWindow();
-
+        function AddMarkerToMap(position, name, isUser, description = '')
+        {
             const normalEggImage = document.createElement("img");
             if (isUser) normalEggImage.src = "/EasterEgg.png";
             else normalEggImage.src = "/NormalEgg.png";
@@ -54,8 +56,29 @@
             // Add a click listener for each marker, and set up the info window.
             marker.addListener('click', ({ domEvent, latLng }) => {
                 const { target } = domEvent;
-                infoWindow.close();
-                infoWindow.setContent(`
+
+                let likeButtonListener = function () {
+                    if (panelPointInfo_CurrentMarker) {
+                        console.log('Like button clicked');
+                        console.log(panelPointInfo_CurrentMarker.title);
+                    }
+                };
+
+                let favoriteButtonListener = function () {
+                    if (panelPointInfo_CurrentMarker) {
+                        console.log('Favorite button clicked');
+                        console.log(panelPointInfo_CurrentMarker.title);
+                    }
+                };
+
+                if (isInfoWindowOpen(panelCreatePoint))
+                    panelCreatePoint.close();
+
+                if (isInfoWindowOpen(panelPointInfo))
+                    panelPointInfo.close();
+                
+                panelPointInfo = new InfoWindow();
+                panelPointInfo.setContent(`
                     <style>
                         #infoWindowContent {
                             min-width: 200px;
@@ -100,25 +123,17 @@
                         </div>
                     </div>
                 `);
-                infoWindow.open(marker.map, marker);
+                panelPointInfo.open(marker.map, marker);
 
-                google.maps.event.addListener(infoWindow, 'domready', function () {
+                panelPointInfo_CurrentMarker = marker;
+
+                google.maps.event.addListener(panelPointInfo, 'domready', function () {
                     var likeButton = document.getElementById('likeButton');
                     var favoriteButton = document.getElementById('favoriteButton');
-
-                    likeButton.addEventListener('click', function () {
-                        console.log('Like button clicked');
-                        console.log(marker.title);
-                    });
-
-                    favoriteButton.addEventListener('click', function () {
-                        console.log('Favorite button clicked');
-                        console.log(marker.title);
-                    });
+                    likeButton.addEventListener('click', likeButtonListener);
+                    favoriteButton.addEventListener('click', favoriteButtonListener);
                 });
             });
-
-            
 
             return marker;
         }
@@ -294,7 +309,7 @@
                     }).then(response => {
                         if (response.ok) {
                             //console.log('Point created successfully');
-                            infoWindow.close();
+                            panelCreatePoint.close();
                             drawPoints();
                         } else {
                             response.json().then(x => {
@@ -318,29 +333,32 @@
                     });
                 });
 
+                if (isInfoWindowOpen(panelPointInfo))
+                    panelPointInfo.close();
+
                 // If an info window already exists, reuse it
-                if (isInfoWindowOpen(infoWindow)) {
+                if (isInfoWindowOpen(panelCreatePoint)) {
                 }
                 else {
                     // Create a new info window with the form as its content
-                    infoWindow = new InfoWindow({
+                    panelCreatePoint = new InfoWindow({
                         content: form
                     });
-                    infoWindow.open(map);
+                    panelCreatePoint.open(map);
 
                     // Event listener to the close button of the info window to close it.
                     // Using "domready" ensures that the dom is loaded and can find the component
-                    google.maps.event.addListener(infoWindow, 'domready', function () {
+                    google.maps.event.addListener(panelCreatePoint, 'domready', function () {
                         var cancelButton = document.getElementById('createPointCancel');
                         if (!cancelButton) return;
                         cancelButton.addEventListener('click', function () {
-                            infoWindow.close();
+                            panelCreatePoint.close();
                         });
                     });
                 }
 
                 // Open the info window at the clicked location
-                infoWindow.setPosition(e.latLng);
+                panelCreatePoint.setPosition(e.latLng);
             });
 
             const centerControlDiv = document.createElement("div");
@@ -364,6 +382,7 @@
             ({ key: apiKey, v: "weekly" });
 
         function isInfoWindowOpen(infoWindow) {
+            if (!infoWindow) return false;
             var map = infoWindow.getMap();
             return (map !== null && typeof map !== "undefined");
         }
