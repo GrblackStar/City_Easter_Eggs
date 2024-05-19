@@ -55,21 +55,67 @@
             marker.addListener('click', ({ domEvent, latLng }) => {
                 const { target } = domEvent;
                 infoWindow.close();
-                //infoWindow.setContent(marker.title);
-                // infoWindow.setContent(`<h2>${marker.title}</h2><p>${description}</p>`);
                 infoWindow.setContent(`
-                    <div style="margin-bottom: 15px;">
-                        <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Name</label>
-                        <div id="name" style="margin-left: 10px;">${marker.title}</div>
-                    </div>
-                    ${description ? `
-                        <div style="margin-top: 10px;">
-                            <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
-                            <div id="description" style="margin-left: 10px;">${description}</div>
+                    <style>
+                        #infoWindowContent {
+                            min-width: 200px;
+                            max-width: 400px;
+                            max-height: 600px;
+                        }
+                        #nameSection, #descriptionSection {
+                            margin-bottom: 15px;
+                        }
+                        #name, #description {
+                            margin-left: 10px;
+                        }
+                        #buttonSection {
+                            margin-top: 20px;
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        #likeButton, #favoriteButton {
+                            border: none;
+                            background: none;
+                            padding: 0;
+                            outline: 0;
+                            width: 25px;
+                            height: 25px;
+                        }
+                    </style>
+
+                    <div id="infoWindowContent">
+                        <div id="nameSection">
+                            <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Name</label>
+                            <div id="name">${marker.title}</div>
                         </div>
-                    ` : ''}
+                        ${description ? `
+                            <div id="descriptionSection">
+                                <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
+                                <div id="description">${description}</div>
+                            </div>
+                        ` : ''}
+                        <div id="buttonSection">
+                            <button id="likeButton"><img src="LikeIcon.png" alt="Like" style="width: 25px; height: 25px;"></button>
+                            <button id="favoriteButton"><img src="HeartIcon.png" alt="Favorite" style="width: 25px; height: 25px;"></button>
+                        </div>
+                    </div>
                 `);
                 infoWindow.open(marker.map, marker);
+
+                google.maps.event.addListener(infoWindow, 'domready', function () {
+                    var likeButton = document.getElementById('likeButton');
+                    var favoriteButton = document.getElementById('favoriteButton');
+
+                    likeButton.addEventListener('click', function () {
+                        console.log('Like button clicked');
+                        console.log(marker.title);
+                    });
+
+                    favoriteButton.addEventListener('click', function () {
+                        console.log('Favorite button clicked');
+                        console.log(marker.title);
+                    });
+                });
             });
 
             
