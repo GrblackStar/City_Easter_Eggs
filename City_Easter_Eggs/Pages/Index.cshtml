@@ -37,7 +37,7 @@
         var geoLoc;
         let lastPos = null;
 
-        function AddMarkerToMap(position, name, isUser, description = '')
+        function AddMarkerToMap(position, name, isUser, description = '', likes = 0)
         {
             const normalEggImage = document.createElement("img");
             if (isUser) normalEggImage.src = "/EasterEgg.png";
@@ -78,6 +78,8 @@
                     panelPointInfo.close();
                 
                 panelPointInfo = new InfoWindow();
+                if (isUser) panelPointInfo.setContent(marker.title);
+                else
                 panelPointInfo.setContent(`
                     <style>
                         #infoWindowContent {
@@ -96,6 +98,9 @@
                             display: flex;
                             justify-content: space-between;
                         }
+                        #likeSection {
+                            display: flex;
+                        }
                         #likeButton, #favoriteButton {
                             border: none;
                             background: none;
@@ -103,7 +108,7 @@
                             outline: 0;
                             width: 25px;
                             height: 25px;
-                        }
+                        }   
                     </style>
 
                     <div id="infoWindowContent">
@@ -111,16 +116,21 @@
                             <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Name</label>
                             <div id="name">${marker.title}</div>
                         </div>
-                        ${description ? `
-                            <div id="descriptionSection">
-                                <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
-                                <div id="description">${description}</div>
+                        ${!isUser ? `
+                            ${description ? `
+                                <div id="descriptionSection">
+                                    <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
+                                    <div id="description">${description}</div>
+                                </div>
+                            ` : ''}
+                            <div id="buttonSection">
+                                <div id="likeSection">
+                                    <button id="likeButton"><img src="LikeIcon.png" alt="Like" style="width: 25px; height: 25px;"></button>
+                                    <label for="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px;">${likes}</label>
+                                </div>
+                                <button id="favoriteButton"><img src="HeartIcon.png" alt="Favorite" style="width: 25px; height: 25px;"></button>
                             </div>
                         ` : ''}
-                        <div id="buttonSection">
-                            <button id="likeButton"><img src="LikeIcon.png" alt="Like" style="width: 25px; height: 25px;"></button>
-                            <button id="favoriteButton"><img src="HeartIcon.png" alt="Favorite" style="width: 25px; height: 25px;"></button>
-                        </div>
                     </div>
                 `);
                 panelPointInfo.open(marker.map, marker);
@@ -130,8 +140,8 @@
                 google.maps.event.addListener(panelPointInfo, 'domready', function () {
                     var likeButton = document.getElementById('likeButton');
                     var favoriteButton = document.getElementById('favoriteButton');
-                    likeButton.addEventListener('click', likeButtonListener);
-                    favoriteButton.addEventListener('click', favoriteButtonListener);
+                    if (likeButton != null) likeButton.addEventListener('click', likeButtonListener);
+                    if (favoriteButton != null) favoriteButton.addEventListener('click', favoriteButtonListener);
                 });
             });
 
@@ -145,7 +155,7 @@
             for (let i = 0; i < pointsFromBackend.length; i++) {
                 const thisPoint = pointsFromBackend[i];
                 const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude };
-                AddMarkerToMap(posForGMaps, thisPoint.name, false, thisPoint.description);
+                AddMarkerToMap(posForGMaps, thisPoint.name, false, thisPoint.description, thisPoint.likes);
             }
             // Remove old markers after drawing new ones and swap the arrays for the next draw
             removeOldMarkers();
