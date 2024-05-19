@@ -33,7 +33,7 @@
         var geoLoc;
         let lastPos = null;
 
-        function AddMarkerToMap(position, name, isUser) {
+        function AddMarkerToMap(position, name, isUser, description = '') {
             // Create an info window to share between markers.
             if (infoWindow == null) infoWindow = new InfoWindow();
 
@@ -55,9 +55,24 @@
             marker.addListener('click', ({ domEvent, latLng }) => {
                 const { target } = domEvent;
                 infoWindow.close();
-                infoWindow.setContent(marker.title);
+                //infoWindow.setContent(marker.title);
+                // infoWindow.setContent(`<h2>${marker.title}</h2><p>${description}</p>`);
+                infoWindow.setContent(`
+                    <div style="margin-bottom: 15px;">
+                        <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Name</label>
+                        <div id="name" style="margin-left: 10px;">${marker.title}</div>
+                    </div>
+                    ${description ? `
+                        <div style="margin-top: 10px;">
+                            <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
+                            <div id="description" style="margin-left: 10px;">${description}</div>
+                        </div>
+                    ` : ''}
+                `);
                 infoWindow.open(marker.map, marker);
             });
+
+            
 
             return marker;
         }
@@ -67,9 +82,9 @@
             pointsFromBackend = JSON.parse(pointsFromBackend);
 
             for (let i = 0; i < pointsFromBackend.length; i++) {
-                const thisPoint = pointsFromBackend[i]
-                const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude }
-                AddMarkerToMap(posForGMaps, thisPoint.name, false)
+                const thisPoint = pointsFromBackend[i];
+                const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude };
+                AddMarkerToMap(posForGMaps, thisPoint.name, false, thisPoint.description);
             }
             // Remove old markers after drawing new ones and swap the arrays for the next draw
             removeOldMarkers();
@@ -282,12 +297,9 @@
                 infoWindow.setPosition(e.latLng);
             });
 
-            // Create the DIV to hold the control.
             const centerControlDiv = document.createElement("div");
-            // Create the control.
             const centerControl = createCenterControl(map);
 
-            // Append the control to the DIV.
             centerControlDiv.appendChild(centerControl);
             map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerControlDiv);
         }
@@ -295,27 +307,10 @@
         
 
         await initMap();
-        // var centerButton = $('#centerButton');
-        // centerButton.hide();
-        // var centerButtonHTML = centerButton[0]
-
-        // await initMap();
-
-        // centerButtonHTML.addEventListener('click', async function () {
-        //     if (map != null && lastPos != null) {
-        //         // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
-        //         map.panTo(lastPos);
-        //     }
-        // });
-
-        // map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerButtonHTML);
-        // centerButton.show();
-
         await updateLocation();
     </script>
 </head>
 <body>
-    <!-- <button id="centerButton" style="display: none;" class="btn btn-lg btn-primary">Back to my location</button> -->
     <div style="height: 700px" id="map"></div>
     <script>
         const apiKey = "@MapService.GetAPIKey()";
