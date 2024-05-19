@@ -28,6 +28,10 @@
         let infoWindow = null; // https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers
         var oldMarkers = [];
         var newMarkers = [];
+        var userMarker = null;
+        var watchID;
+        var geoLoc;
+        let lastPos = null;
 
         function AddMarkerToMap(position, name, isUser) {
             // Create an info window to share between markers.
@@ -45,7 +49,7 @@
                 title: name,
                 content: normalEggImage,
             });
-            newMarkers.push(marker);
+            if(!isUser) newMarkers.push(marker);
 
             // Add a click listener for each marker, and set up the info window.
             marker.addListener('click', ({ domEvent, latLng }) => {
@@ -80,11 +84,6 @@
             oldMarkers = [];
         }
 
-        let userMarker = null;
-        var watchID;
-        var geoLoc;
-        let lastPos = null;
-
         function GetPosDist(pointA, pointB) {
             var a = pointA.lat - pointB.lat;
             var b = pointA.lng - pointB.lng;
@@ -105,7 +104,7 @@
             lastPos = pos;
 
             // If the user marker doesn't exist, create it.
-            if (userMarker == null) {
+            if (!userMarker) {
                 userMarker = AddMarkerToMap(pos, "Current Location", true);
                 userMarker.optimized = false;
                 userMarker.zIndex = 99999999;
@@ -113,6 +112,7 @@
             else {
                 // If it does exist, update its position.
                 userMarker.position = pos;
+                //userMarker.setPosition(pos);
             }
 
             //const center = new google.maps.LatLng(latitude, longitude);
@@ -139,6 +139,20 @@
             }
         }
 
+        function createCenterControl(map) {
+            const controlButton = document.createElement("button");
+            controlButton.className = "btn btn-lg btn-primary";
+            controlButton.textContent = "Back to my location";
+            controlButton.addEventListener("click", async function () {
+                if (map != null && lastPos != null) {
+                // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
+                map.panTo(lastPos);
+            }
+            });
+
+            return controlButton;
+        }
+
         async function initMap() {
             // The map, centered at the current position
             var myPos = await GetUserLocation();
@@ -157,6 +171,7 @@
                 gestureHandling: "greedy"
             });
 
+            showLocation(myPos);
             drawPoints();
 
             map.addListener('click', function (e) {
@@ -266,21 +281,41 @@
                 // Open the info window at the clicked location
                 infoWindow.setPosition(e.latLng);
             });
+
+            // Create the DIV to hold the control.
+            const centerControlDiv = document.createElement("div");
+            // Create the control.
+            const centerControl = createCenterControl(map);
+
+            // Append the control to the DIV.
+            centerControlDiv.appendChild(centerControl);
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerControlDiv);
         }
 
-        document.getElementById('centerButton').addEventListener('click', async function() {
-            if (map != null && lastPos != null) {
-                // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
-                map.panTo(lastPos);
-            }
-        });
+        
 
-        initMap();
-        updateLocation();
+        await initMap();
+        // var centerButton = $('#centerButton');
+        // centerButton.hide();
+        // var centerButtonHTML = centerButton[0]
+
+        // await initMap();
+
+        // centerButtonHTML.addEventListener('click', async function () {
+        //     if (map != null && lastPos != null) {
+        //         // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
+        //         map.panTo(lastPos);
+        //     }
+        // });
+
+        // map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerButtonHTML);
+        // centerButton.show();
+
+        await updateLocation();
     </script>
 </head>
 <body>
-    <button id="centerButton" style="padding: 10px; margin: 10px 0px 10px 0px;" class="btn btn-lg btn-primary">Back to my location</button>
+    <!-- <button id="centerButton" style="display: none;" class="btn btn-lg btn-primary">Back to my location</button> -->
     <div style="height: 700px" id="map"></div>
     <script>
         const apiKey = "@MapService.GetAPIKey()";
