@@ -20,6 +20,9 @@
     </style>
 
     <script type="module">
+        const IsUserLoggedIn = "@User.Identity!.IsAuthenticated" == 'True';
+        window.IsUserLoggedIn = IsUserLoggedIn;
+
         // Request needed libraries.
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");

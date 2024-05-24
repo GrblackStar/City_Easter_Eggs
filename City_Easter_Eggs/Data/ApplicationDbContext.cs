@@ -11,6 +11,8 @@ namespace City_Easter_Eggs.Data
 	{
 		public DbSet<User> Users { get; set; } = default!;
 		public DbSet<PointOfInterest> POIs { get; set; } = default!;
+		public DbSet<FavouritePoints> FavouritePoints { get; set; } = default!;
+		public DbSet<LikedPoints> LikedPoints { get; set; } = default!;
 
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 		{
@@ -22,6 +24,8 @@ namespace City_Easter_Eggs.Data
 
 			builder.Entity<User>().HasMany(u => u.PlacedPoints);
 			builder.Entity<PointOfInterest>().HasOne(p => p.Creator);
+			builder.Entity<FavouritePoints>().HasKey(fp => new { fp.UserId, fp.PointId });
+			builder.Entity<LikedPoints>().HasKey(lp => new { lp.UserId, lp.PointId });
 		}
 
 		public static void SetupDatabase(WebApplicationBuilder builder)
@@ -43,28 +47,6 @@ namespace City_Easter_Eggs.Data
 				OptionsConfigCallback(dbBuilder);
 				var dbContext = new ApplicationDbContext(dbBuilder.Options);
 				dbContext.Database.Migrate();
-
-				// Initial debug data
-				/*if (!dbContext.POIs.Any())
-				{
-					var systemUser = new User("SystemUser");
-					dbContext.Users.Add(systemUser);
-
-					for (var x = 0; x < 10; x++)
-					{
-						for (var y = 0; y < 10; y++)
-						{
-							dbContext.POIs.Add(new PointOfInterest
-							{
-								PointId = $"test_{x}x{y}",
-								Name = $"Debug Point {x} {y}",
-								Longitude = 20 + x,
-								Latitude = 40 + y,
-								Creator = systemUser
-							});
-						}
-					}
-				}*/
 
 				dbContext.SaveChanges();
 				dbContext.Dispose();
