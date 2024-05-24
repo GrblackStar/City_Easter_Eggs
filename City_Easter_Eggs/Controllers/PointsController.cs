@@ -32,6 +32,11 @@ namespace City_Easter_Eggs.Controllers
             return _service.GetPoints();
         }
 
+        public async Task LikePoint(UpdatePointInputModel marker)
+        {
+            await _service.LikePoint(marker.MarkerId);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreatePoint(CreatePointInputModel input)
         {
@@ -52,6 +57,11 @@ namespace City_Easter_Eggs.Controllers
 
             public double UserLocationLongitude { get; set; }
             public double UserLocationLatitude { get; set; }
+        }
+
+        public class UpdatePointInputModel
+        {
+            public string MarkerId { get; set; }
         }
     }
 }

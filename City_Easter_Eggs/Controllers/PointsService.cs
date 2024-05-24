@@ -25,6 +25,30 @@ namespace City_Easter_Eggs.Controllers
             return _context.POIs;
         }
 
+        public async Task LikePoint(string markerId)
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            var currentUser = await _userService.GetUserFromPrincipal(user);
+
+            var point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
+
+            if (point == null) return;
+
+            var like = new LikedPoints
+            {
+                UserId = currentUser.UserId,
+                PointId = point.PointId
+            };
+
+            point.LikedPoints.Add(like);
+            point.Likes++;
+
+            currentUser.LikedPoints.Add(like);
+            point.Creator.LikesObtained++;
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task CreatePointAsync(string name, string description, double longitude, double latitude)
         {
             var user = _httpContextAccessor.HttpContext?.User;

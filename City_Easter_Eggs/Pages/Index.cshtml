@@ -40,8 +40,7 @@
         var geoLoc;
         let lastPos = null;
 
-        function AddMarkerToMap(position, name, isUser, description = '', likes = 0)
-        {
+        function AddMarkerToMap(position, name, isUser, description = '', likes = 0, markerId = null) {
             const normalEggImage = document.createElement("img");
             if (isUser) normalEggImage.src = "/EasterEgg.png";
             else normalEggImage.src = "/NormalEgg.png";
@@ -64,6 +63,23 @@
                     if (panelPointInfo_CurrentMarker) {
                         console.log('Like button clicked');
                         console.log(panelPointInfo_CurrentMarker.title);
+
+                        if (markerId == null) return;
+                        fetch('/Points/LikePoint', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ markerId: markerId }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Update the likes label
+                            document.getElementById('likes').textContent = data.newLikes;
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
                     }
                 };
 
@@ -154,11 +170,12 @@
         async function drawPoints() {
             let pointsFromBackend = await HttpGet("/Points/GetPoints");
             pointsFromBackend = JSON.parse(pointsFromBackend);
+            //debugger;
 
             for (let i = 0; i < pointsFromBackend.length; i++) {
                 const thisPoint = pointsFromBackend[i];
                 const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude };
-                AddMarkerToMap(posForGMaps, thisPoint.name, false, thisPoint.description, thisPoint.likes);
+                AddMarkerToMap(posForGMaps, thisPoint.name, false, thisPoint.description, thisPoint.likes, thisPoint.pointId);
             }
             // Remove old markers after drawing new ones and swap the arrays for the next draw
             removeOldMarkers();
