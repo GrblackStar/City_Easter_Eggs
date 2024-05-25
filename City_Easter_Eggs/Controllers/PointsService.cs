@@ -2,6 +2,10 @@
 
 using City_Easter_Eggs.Data;
 using City_Easter_Eggs.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections;
+using System.Security.Claims;
+using static City_Easter_Eggs.Controllers.PointsController;
 
 #endregion
 
@@ -20,34 +24,72 @@ namespace City_Easter_Eggs.Controllers
             _userService = userService;
         }
 
-        public IEnumerable<PointOfInterest> GetPoints()
+        public async Task<IEnumerable<PointOfInterestFrontend>> GetPoints()
         {
-            return _context.POIs;
+            ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
+            User? currentUser = await _userService.GetUserFromPrincipal(user);
+
+            var points = _context.POIs.Include(x => x.Creator);
+            return points.Select(p => new PointOfInterestFrontend(p, currentUser));
         }
 
-        public async Task<int> LikePoint(string markerId)
+        public async Task<PointDetailsDto> GetPointDetailsAsync(string markerId)
+        {
+            //var user = _httpContextAccessor.HttpContext?.User;
+            //var currentUser = await _userService.GetUserFromPrincipal(user);
+
+            //var point = await _context.POIs
+            //    .Include(p => p.LikedPoints)
+            //    .Include(p => p.FavoritedPoints)
+            //    .FirstOrDefaultAsync(p => p.PointId == markerId);
+
+            //if (point == null) return null;
+
+            //var isLiked = point.LikedPoints.Any(lp => lp.User.UserId == currentUser.UserId);
+            //var isFavorite = point.FavoritedPoints.Any(fp => fp.User.UserId == currentUser.UserId);
+
+            //return new PointDetailsDto
+            //{
+            //    Name = point.Name,
+            //    Description = point.Description,
+            //    Likes = point.Likes,
+            //    IsLiked = isLiked,
+            //    IsFavorite = isFavorite
+            //};
+            return null;
+        }
+
+        public async Task<IEnumerable<string>> GetLikedByUser()
         {
             var user = _httpContextAccessor.HttpContext?.User;
             var currentUser = await _userService.GetUserFromPrincipal(user);
+            if (currentUser == null) return null;
 
-            var point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
+            return currentUser.LikedPoints.Select(x => x.PointId);
+        }
 
-            if (point == null) return 0;
+        public async Task<PointOfInterestFrontend> LikePoint(string markerId)
+        {
+            ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
+            User? currentUser = await _userService.GetUserFromPrincipal(user);
+
+            PointOfInterest? point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
+
+            if (point == null) return null;
 
             var like = new LikedPoints
             {
-                UserId = currentUser.UserId,
-                PointId = point.PointId
+                User = currentUser,
+                Point = point
             };
 
-            point.LikedPoints.Add(like);
             point.Likes++;
-
+            point.LikedPoints.Add(like);
             currentUser.LikedPoints.Add(like);
             point.Creator.LikesObtained++;
 
             await _context.SaveChangesAsync();
-            return point.Likes;
+            return new PointOfInterestFrontend(point, currentUser);
         }
 
         public async Task CreatePointAsync(string name, string description, double longitude, double latitude)
@@ -68,5 +110,14 @@ namespace City_Easter_Eggs.Controllers
 
             await _context.SaveChangesAsync();
         }
+    }
+
+    public class PointDetailsDto
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int Likes { get; set; }
+        public bool IsLiked { get; set; }
+        public bool IsFavorite { get; set; }
     }
 }

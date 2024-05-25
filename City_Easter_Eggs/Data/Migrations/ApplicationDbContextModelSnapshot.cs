@@ -23,36 +23,40 @@ namespace City_Easter_Eggs.Migrations
 
             modelBuilder.Entity("City_Easter_Eggs.Models.FavouritePoints", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("FavoriteId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PointId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("PointOfInterestPointId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("UserId", "PointId");
+                    b.HasKey("FavoriteId");
 
-                    b.HasIndex("PointOfInterestPointId");
+                    b.HasIndex("PointId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("FavouritePoints");
                 });
 
             modelBuilder.Entity("City_Easter_Eggs.Models.LikedPoints", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("LikedId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PointId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("PointOfInterestPointId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("UserId", "PointId");
+                    b.HasKey("LikedId");
 
-                    b.HasIndex("PointOfInterestPointId");
+                    b.HasIndex("PointId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("LikedPoints");
                 });
@@ -123,34 +127,30 @@ namespace City_Easter_Eggs.Migrations
 
             modelBuilder.Entity("City_Easter_Eggs.Models.FavouritePoints", b =>
                 {
-                    b.HasOne("City_Easter_Eggs.Models.PointOfInterest", "PointOfInterest")
+                    b.HasOne("City_Easter_Eggs.Models.PointOfInterest", "Point")
                         .WithMany("FavoritedPoints")
-                        .HasForeignKey("PointOfInterestPointId");
+                        .HasForeignKey("PointId");
 
                     b.HasOne("City_Easter_Eggs.Models.User", "User")
                         .WithMany("FavoritedPoints")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
-                    b.Navigation("PointOfInterest");
+                    b.Navigation("Point");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("City_Easter_Eggs.Models.LikedPoints", b =>
                 {
-                    b.HasOne("City_Easter_Eggs.Models.PointOfInterest", "PointOfInterest")
+                    b.HasOne("City_Easter_Eggs.Models.PointOfInterest", "Point")
                         .WithMany("LikedPoints")
-                        .HasForeignKey("PointOfInterestPointId");
+                        .HasForeignKey("PointId");
 
                     b.HasOne("City_Easter_Eggs.Models.User", "User")
                         .WithMany("LikedPoints")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
-                    b.Navigation("PointOfInterest");
+                    b.Navigation("Point");
 
                     b.Navigation("User");
                 });

@@ -27,16 +27,28 @@ namespace City_Easter_Eggs.Controllers
             _service = service;
         }
 
-        public IEnumerable<PointOfInterest> GetPoints()
+        public Task<IEnumerable<PointOfInterestFrontend>> GetPoints()
         {
             return _service.GetPoints();
+        }
+
+        public async Task<IActionResult> GetPointDetails(UpdatePointInputModel marker)
+        {
+            var pointDetails = await _service.GetPointDetailsAsync(marker.MarkerId);
+
+            if (pointDetails == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(pointDetails);
         }
 
         [HttpPost]
         public async Task<IActionResult> LikePoint(UpdatePointInputModel marker)
         {
-            var newLikes = await _service.LikePoint(marker.MarkerId);
-            return Ok(new { newLikes = newLikes });
+            PointOfInterestFrontend pointLiked = await _service.LikePoint(marker.MarkerId);
+            return Ok(pointLiked);
         }
 
         [HttpPost]
@@ -46,6 +58,18 @@ namespace City_Easter_Eggs.Controllers
 
             //return RedirectToPage("/Index");
             return Ok();
+        }
+
+        public class PointOfInterestFrontend
+        {
+            public PointOfInterest Point { get; set; }
+            public bool LikedByCurrentUser { get; set; }
+
+            public PointOfInterestFrontend(PointOfInterest point, User? loggedInUser)
+            {
+                Point = point;
+                LikedByCurrentUser = loggedInUser != null && loggedInUser.LikedPoints.Any(x => x.PointId == point.PointId);
+            }
         }
 
         public class CreatePointInputModel

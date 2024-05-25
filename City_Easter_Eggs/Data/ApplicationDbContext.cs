@@ -23,9 +23,11 @@ namespace City_Easter_Eggs.Data
 			base.OnModelCreating(builder);
 
 			builder.Entity<User>().HasMany(u => u.PlacedPoints);
+			builder.Entity<User>().HasMany(u => u.LikedPoints).WithOne(l => l.User);
+			builder.Entity<User>().HasMany(u => u.FavoritedPoints).WithOne(l => l.User);
 			builder.Entity<PointOfInterest>().HasOne(p => p.Creator);
-			builder.Entity<FavouritePoints>().HasKey(fp => new { fp.UserId, fp.PointId });
-			builder.Entity<LikedPoints>().HasKey(lp => new { lp.UserId, lp.PointId });
+			builder.Entity<PointOfInterest>().HasMany(p => p.LikedPoints).WithOne(l => l.Point);
+			builder.Entity<PointOfInterest>().HasMany(p => p.FavoritedPoints).WithOne(l => l.Point);
 		}
 
 		public static void SetupDatabase(WebApplicationBuilder builder)

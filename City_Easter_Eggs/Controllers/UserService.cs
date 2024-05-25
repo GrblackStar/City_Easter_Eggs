@@ -144,6 +144,11 @@ namespace City_Easter_Eggs.Controllers
             return principal.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
+        public Task<User?> GetUserFromId(string userId)
+        {
+            return _db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+        }
+
         public async Task SignInAsync(User user, bool rememberMe = false)
         {
             ClaimsPrincipal principal = CreateUserPrincipal(user);

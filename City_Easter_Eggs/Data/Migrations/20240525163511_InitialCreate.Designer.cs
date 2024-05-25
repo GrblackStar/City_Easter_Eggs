@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace City_Easter_Eggs.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240211142557_Test")]
-    partial class Test
+    [Migration("20240525163511_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,46 @@ namespace City_Easter_Eggs.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("City_Easter_Eggs.Models.FavouritePoints", b =>
+                {
+                    b.Property<string>("FavoriteId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PointId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("FavoriteId");
+
+                    b.HasIndex("PointId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FavouritePoints");
+                });
+
+            modelBuilder.Entity("City_Easter_Eggs.Models.LikedPoints", b =>
+                {
+                    b.Property<string>("LikedId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PointId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LikedId");
+
+                    b.HasIndex("PointId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LikedPoints");
+                });
 
             modelBuilder.Entity("City_Easter_Eggs.Models.PointOfInterest", b =>
                 {
@@ -88,6 +128,36 @@ namespace City_Easter_Eggs.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("City_Easter_Eggs.Models.FavouritePoints", b =>
+                {
+                    b.HasOne("City_Easter_Eggs.Models.PointOfInterest", "Point")
+                        .WithMany("FavoritedPoints")
+                        .HasForeignKey("PointId");
+
+                    b.HasOne("City_Easter_Eggs.Models.User", "User")
+                        .WithMany("FavoritedPoints")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Point");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("City_Easter_Eggs.Models.LikedPoints", b =>
+                {
+                    b.HasOne("City_Easter_Eggs.Models.PointOfInterest", "Point")
+                        .WithMany("LikedPoints")
+                        .HasForeignKey("PointId");
+
+                    b.HasOne("City_Easter_Eggs.Models.User", "User")
+                        .WithMany("LikedPoints")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Point");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("City_Easter_Eggs.Models.PointOfInterest", b =>
                 {
                     b.HasOne("City_Easter_Eggs.Models.User", "Creator")
@@ -99,8 +169,19 @@ namespace City_Easter_Eggs.Migrations
                     b.Navigation("Creator");
                 });
 
+            modelBuilder.Entity("City_Easter_Eggs.Models.PointOfInterest", b =>
+                {
+                    b.Navigation("FavoritedPoints");
+
+                    b.Navigation("LikedPoints");
+                });
+
             modelBuilder.Entity("City_Easter_Eggs.Models.User", b =>
                 {
+                    b.Navigation("FavoritedPoints");
+
+                    b.Navigation("LikedPoints");
+
                     b.Navigation("PlacedPoints");
                 });
 #pragma warning restore 612, 618

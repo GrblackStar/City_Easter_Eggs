@@ -34,16 +34,22 @@
         // https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers
         let panelCreatePoint = null;
         var oldMarkers = [];
-        var newMarkers = [];
         var userMarker = null;
         var watchID;
         var geoLoc;
         let lastPos = null;
 
-        function AddMarkerToMap(position, name, isUser, description = '', likes = 0, markerId = null) {
+        var pointsFromBackend = [];
+        
+        function AddPointToMap(pointIndex)
+        {
+            var pointData = pointsFromBackend[pointIndex];
+            var thisPoint = pointData.point;
+            const position = { lat: thisPoint.latitude, lng: thisPoint.longitude };
+            const name = thisPoint.name;
+
             const normalEggImage = document.createElement("img");
-            if (isUser) normalEggImage.src = "/EasterEgg.png";
-            else normalEggImage.src = "/NormalEgg.png";
+            normalEggImage.src = "/NormalEgg.png";
             normalEggImage.width = 28;
             normalEggImage.height = 28;
 
@@ -53,10 +59,16 @@
                 title: name,
                 content: normalEggImage,
             });
-            if(!isUser) newMarkers.push(marker);
 
             // Add a click listener for each marker, and set up the info window.
             marker.addListener('click', ({ domEvent, latLng }) => {
+                var pointData = pointsFromBackend[pointIndex];
+                var thisPoint = pointData.point;
+                var likes = thisPoint.likes;
+                var description = thisPoint.description;
+                var markerId = thisPoint.pointId;
+                console.dir(pointData)
+
                 const { target } = domEvent;
 
                 let likeButtonListener = function () {
@@ -74,8 +86,10 @@
                         })
                         .then(response => response.json())
                         .then(data => {
+                            pointsFromBackend[pointIndex] = data
+
                             // Update the likes label
-                            document.getElementById('likes').textContent = data.newLikes;
+                            document.getElementById('likes').textContent = data.point.likes;
                             // Change the like button image
                             let likeButtonImage = document.querySelector('#likeButton img');
                             likeButtonImage.src = 'LikedIcon.png';
@@ -100,8 +114,6 @@
                     panelPointInfo.close();
                 
                 panelPointInfo = new InfoWindow();
-                if (isUser) panelPointInfo.setContent(marker.title);
-                else
                 panelPointInfo.setContent(`
                     <style>
                         #infoWindowContent {
@@ -138,21 +150,19 @@
                             <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Name</label>
                             <div id="name">${marker.title}</div>
                         </div>
-                        ${!isUser ? `
-                            ${description ? `
-                                <div id="descriptionSection">
-                                    <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
-                                    <div id="description">${description}</div>
-                                </div>
-                            ` : ''}
-                            <div id="buttonSection">
-                                <div id="likeSection">
-                                    <button id="likeButton"><img src="LikeIcon.png" alt="Like" style="width: 25px; height: 25px;"></button>
-                                    <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
-                                </div>
-                                <button id="favoriteButton"><img src="HeartIcon.png" alt="Favorite" style="width: 25px; height: 25px;"></button>
+                        ${description ? `
+                            <div id="descriptionSection">
+                                <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
+                                <div id="description">${description}</div>
                             </div>
                         ` : ''}
+                        <div id="buttonSection">
+                            <div id="likeSection">
+                                <button id="likeButton"><img src="LikeIcon.png" alt="Like" style="width: 25px; height: 25px;"></button>
+                                <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
+                            </div>
+                            <button id="favoriteButton"><img src="HeartIcon.png" alt="Favorite" style="width: 25px; height: 25px;"></button>
+                        </div>
                     </div>
                 `);
                 panelPointInfo.open(marker.map, marker);
@@ -166,24 +176,53 @@
                     if (favoriteButton != null) favoriteButton.addEventListener('click', favoriteButtonListener);
                 });
             });
+            return marker;
+        }
+
+        function AddMarkerToMap(position, name) {
+            const normalEggImage = document.createElement("img");
+            normalEggImage.src = "/EasterEgg.png";
+            normalEggImage.width = 28;
+            normalEggImage.height = 28;
+
+            const marker = new AdvancedMarkerElement({
+                map: map,
+                position: position,
+                title: name,
+                content: normalEggImage,
+            });
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener('click', ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+
+                if (isInfoWindowOpen(panelCreatePoint))
+                    panelCreatePoint.close();
+
+                if (isInfoWindowOpen(panelPointInfo))
+                    panelPointInfo.close();
+                
+                panelPointInfo = new InfoWindow();
+                panelPointInfo.setContent(marker.title);
+                panelPointInfo.open(marker.map, marker);
+
+                panelPointInfo_CurrentMarker = marker;
+            });
 
             return marker;
         }
 
         async function drawPoints() {
-            let pointsFromBackend = await HttpGet("/Points/GetPoints");
-            pointsFromBackend = JSON.parse(pointsFromBackend);
+            var httpGetPoints = await HttpGet("/Points/GetPoints");
+            pointsFromBackend = JSON.parse(httpGetPoints);
             //debugger;
 
+            var newMarkers = []
             for (let i = 0; i < pointsFromBackend.length; i++) {
-                const thisPoint = pointsFromBackend[i];
-                const posForGMaps = { lat: thisPoint.latitude, lng: thisPoint.longitude };
-                AddMarkerToMap(posForGMaps, thisPoint.name, false, thisPoint.description, thisPoint.likes, thisPoint.pointId);
+                newMarkers[i] = AddPointToMap(i);
             }
             // Remove old markers after drawing new ones and swap the arrays for the next draw
             removeOldMarkers();
             oldMarkers = newMarkers;
-            newMarkers = [];
         }
 
         function removeOldMarkers() {
@@ -366,8 +405,13 @@
                     });
                 });
 
-                if (isInfoWindowOpen(panelPointInfo))
-                    panelPointInfo.close();
+                if (isInfoWindowOpen(panelPointInfo) || isInfoWindowOpen(panelCreatePoint)) {
+                    if (isInfoWindowOpen(panelPointInfo))
+                        panelPointInfo.close();
+                    if (isInfoWindowOpen(panelCreatePoint))
+                        panelCreatePoint.close();
+                    return;
+                }
 
                 // If an info window already exists, reuse it
                 if (isInfoWindowOpen(panelCreatePoint)) {
