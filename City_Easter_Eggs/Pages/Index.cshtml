@@ -67,6 +67,8 @@
                 var likes = thisPoint.likes;
                 var description = thisPoint.description;
                 var markerId = thisPoint.pointId;
+                var likedByUser = pointData.likedByCurrentUser;
+                var favoriteByUser = pointData.favoriteByCurrentUser;
                 console.dir(pointData)
 
                 const { target } = domEvent;
@@ -104,6 +106,25 @@
                     if (panelPointInfo_CurrentMarker) {
                         console.log('Favorite button clicked');
                         console.log(panelPointInfo_CurrentMarker.title);
+
+                        if (markerId == null) return;
+                        fetch('/Points/FavoriteAddPoint', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ markerId: markerId }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            pointsFromBackend[pointIndex] = data
+                            // Change the like button image
+                            let heartButtonImage = document.querySelector('#favoriteButton img');
+                            heartButtonImage.src = 'HeartedIcon.png';
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
                     }
                 };
 
@@ -158,10 +179,10 @@
                         ` : ''}
                         <div id="buttonSection">
                             <div id="likeSection">
-                                <button id="likeButton"><img src="LikeIcon.png" alt="Like" style="width: 25px; height: 25px;"></button>
+                                <button id="likeButton"><img src="${likedByUser ? 'LikedIcon.png' : 'LikeIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
                                 <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
                             </div>
-                            <button id="favoriteButton"><img src="HeartIcon.png" alt="Favorite" style="width: 25px; height: 25px;"></button>
+                            <button id="favoriteButton"><img src="${favoriteByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                         </div>
                     </div>
                 `);
