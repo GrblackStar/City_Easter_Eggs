@@ -76,6 +76,9 @@
                         .then(data => {
                             // Update the likes label
                             document.getElementById('likes').textContent = data.newLikes;
+                            // Change the like button image
+                            let likeButtonImage = document.querySelector('#likeButton img');
+                            likeButtonImage.src = 'LikedIcon.png';
                         })
                         .catch((error) => {
                             console.error('Error:', error);
@@ -145,7 +148,7 @@
                             <div id="buttonSection">
                                 <div id="likeSection">
                                     <button id="likeButton"><img src="LikeIcon.png" alt="Like" style="width: 25px; height: 25px;"></button>
-                                    <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px;">${likes}</label>
+                                    <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
                                 </div>
                                 <button id="favoriteButton"><img src="HeartIcon.png" alt="Favorite" style="width: 25px; height: 25px;"></button>
                             </div>
