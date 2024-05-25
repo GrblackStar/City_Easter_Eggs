@@ -32,9 +32,11 @@ namespace City_Easter_Eggs.Controllers
             return _service.GetPoints();
         }
 
-        public async Task LikePoint(UpdatePointInputModel marker)
+        [HttpPost]
+        public async Task<IActionResult> LikePoint(UpdatePointInputModel marker)
         {
-            await _service.LikePoint(marker.MarkerId);
+            var newLikes = await _service.LikePoint(marker.MarkerId);
+            return Ok(new { newLikes = newLikes });
         }
 
         [HttpPost]

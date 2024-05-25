@@ -25,14 +25,14 @@ namespace City_Easter_Eggs.Controllers
             return _context.POIs;
         }
 
-        public async Task LikePoint(string markerId)
+        public async Task<int> LikePoint(string markerId)
         {
             var user = _httpContextAccessor.HttpContext?.User;
             var currentUser = await _userService.GetUserFromPrincipal(user);
 
             var point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
 
-            if (point == null) return;
+            if (point == null) return 0;
 
             var like = new LikedPoints
             {
@@ -47,6 +47,7 @@ namespace City_Easter_Eggs.Controllers
             point.Creator.LikesObtained++;
 
             await _context.SaveChangesAsync();
+            return point.Likes;
         }
 
         public async Task CreatePointAsync(string name, string description, double longitude, double latitude)
