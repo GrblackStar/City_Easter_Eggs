@@ -41,8 +41,7 @@
 
         var pointsFromBackend = [];
         
-        function AddPointToMap(pointIndex)
-        {
+        function AddPointToMap(pointIndex) {
             var pointData = pointsFromBackend[pointIndex];
             var thisPoint = pointData.point;
             const position = { lat: thisPoint.latitude, lng: thisPoint.longitude };
@@ -280,8 +279,7 @@
             return Math.sqrt(a * a + b * b);
         }
 
-        function getDistanceOfTwoPointsInKilometers(pointA, pointB)
-        {
+        function getDistanceOfTwoPointsInKilometers(pointA, pointB) {
             let lat1 = pointA.lat;
             let lon1 = pointA.lng;
             let lat2 = pointB.lat;
@@ -512,6 +510,13 @@
                     panelCreatePoint.setPosition(e.latLng);
                 } else {
                     console.log('You are too far away to create a point here.');
+                    if (isInfoWindowOpen(panelPointInfo) || isInfoWindowOpen(panelCreatePoint)) {
+                        if (isInfoWindowOpen(panelPointInfo))
+                            panelPointInfo.close();
+                        if (isInfoWindowOpen(panelCreatePoint))
+                            panelCreatePoint.close();
+                        return;
+                    }
                 }
             });
 
