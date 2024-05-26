@@ -99,12 +99,17 @@
                             .then(data => {
                                 pointsFromBackend[pointIndex] = data
 
-                                // Update the likes label
+                                // Update the likes label and icon
                                 document.getElementById('likes').textContent = data.point.likes;
-                                // Change the like button image based on whether the point is liked by the user
-                                let likeButtonImage = document.querySelector('#likeButton img');
-                                likeButtonImage.src = isLikedByUser ? 'LikeIcon.png' : 'LikedIcon.png';
-                                isLikedByUser = !isLikedByUser;
+                                this.classList.add('animate');
+                                setTimeout(() => {
+                                    let likeButtonImage = document.querySelector('#likeButton img');
+                                    likeButtonImage.src = isLikedByUser ? 'LikeIcon.png' : 'LikedIcon.png';
+                                    isLikedByUser = !isLikedByUser;
+                                }, 150);
+                                setTimeout(() => {
+                                    this.classList.remove('animate');
+                                }, 300);
                             })
                             .catch((error) => {
                                 console.error('Error:', error);
@@ -136,10 +141,17 @@
                         .then(response => response.json())
                         .then(data => {
                             pointsFromBackend[pointIndex] = data
-                            // Change the like button image
-                            let heartButtonImage = document.querySelector('#favoriteButton img');
-                            heartButtonImage.src = isFavoriteByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
-                            isFavoriteByUser = !isFavoriteByUser;
+                            // Change the like button image with animation
+                            this.classList.add('animate');
+                            // Change the image after the button has finished growing, than resize it
+                            setTimeout(() => {
+                                let heartButtonImage = document.querySelector('#favoriteButton img');
+                                heartButtonImage.src = isFavoriteByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
+                                isFavoriteByUser = !isFavoriteByUser;
+                            }, 150);
+                            setTimeout(() => {
+                                this.classList.remove('animate');
+                            }, 300);
                         })
                         .catch((error) => {
                             console.error('Error:', error);
@@ -160,6 +172,7 @@
                             min-width: 200px;
                             max-width: 400px;
                             max-height: 600px;
+                            overflow: hidden;
                         }
                         #nameSection, #descriptionSection {
                             margin-bottom: 15px;
@@ -182,7 +195,11 @@
                             outline: 0;
                             width: 25px;
                             height: 25px;
-                        }   
+                        } 
+                        .animate {
+                            transition: transform 0.3s;
+                            transform: scale(1.2);
+                        }  
                     </style>
 
                     <div id="infoWindowContent">
@@ -198,10 +215,10 @@
                         ` : ''}
                         <div id="buttonSection">
                             <div id="likeSection">
-                                <button id="likeButton"><img src="${likedByUser ? 'LikedIcon.png' : 'LikeIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
+                                <button id="likeButton" style="margin-left: 5px"><img src="${likedByUser ? 'LikedIcon.png' : 'LikeIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
                                 <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
                             </div>
-                            <button id="favoriteButton"><img src="${favoriteByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
+                            <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                         </div>
                     </div>
                 `);
