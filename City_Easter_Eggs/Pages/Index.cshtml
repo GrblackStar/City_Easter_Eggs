@@ -81,30 +81,39 @@
 
                         if (markerId == null) return;
 
+                        // Calculate the distance between the user's current location and the marker's location in meters
+                        let distance = getDistanceInMeters(lastPos, position);
+
                         // Determine the endpoint based on whether the point is already liked by the user
-                        let endpoint = isLikedByUser ? '/Points/UnlikePoint' : '/Points/LikePoint';
+                        if (distance <= 50) {
+                            // Determine the endpoint based on whether the point is already liked by the user
+                            let endpoint = isLikedByUser ? '/Points/UnlikePoint' : '/Points/LikePoint';
 
-                        fetch(endpoint, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ markerId: markerId }),
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            pointsFromBackend[pointIndex] = data
+                            fetch(endpoint, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ markerId: markerId }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                pointsFromBackend[pointIndex] = data
 
-                            // Update the likes label
-                            document.getElementById('likes').textContent = data.point.likes;
-                            // Change the like button image based on whether the point is liked by the user
-                            let likeButtonImage = document.querySelector('#likeButton img');
-                            likeButtonImage.src = isLikedByUser ? 'LikeIcon.png' : 'LikedIcon.png';
-                            isLikedByUser = !isLikedByUser;
-                        })
-                        .catch((error) => {
-                            console.error('Error:', error);
-                        });
+                                // Update the likes label
+                                document.getElementById('likes').textContent = data.point.likes;
+                                // Change the like button image based on whether the point is liked by the user
+                                let likeButtonImage = document.querySelector('#likeButton img');
+                                likeButtonImage.src = isLikedByUser ? 'LikeIcon.png' : 'LikedIcon.png';
+                                isLikedByUser = !isLikedByUser;
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+                        } else {
+                            // If the distance is more than 50 meters, log a message and do not make the fetch request
+                            console.log('You are too far away to like this point.');
+                        }
                     }
                 };
 
@@ -263,12 +272,43 @@
             }
             oldMarkers = [];
         }
-
+        // used for small distance calculations, as it ignores the curvature of 
         function GetPosDist(pointA, pointB) {
             var a = pointA.lat - pointB.lat;
             var b = pointA.lng - pointB.lng;
 
             return Math.sqrt(a * a + b * b);
+        }
+
+        function getDistanceOfTwoPointsInKilometers(pointA, pointB)
+        {
+            let lat1 = pointA.lat;
+            let lon1 = pointA.lng;
+            let lat2 = pointB.lat;
+            let lon2 = pointB.lng;
+    
+            // The math module contains a function named toRadians which converts from degrees to radians.
+            lon1 =  lon1 * Math.PI / 180;
+            lon2 = lon2 * Math.PI / 180;
+            lat1 = lat1 * Math.PI / 180;
+            lat2 = lat2 * Math.PI / 180;
+    
+            // Haversine formula 
+            let dlon = lon2 - lon1; 
+            let dlat = lat2 - lat1;
+            let a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon / 2),2);
+                
+            let c = 2 * Math.asin(Math.sqrt(a));
+    
+            // Radius of earth in kilometers. Use 3956 for miles
+            let r = 6371;
+    
+            // calculate the result
+            return(c * r);
+        }
+
+        function getDistanceInMeters (pointA, pointB) {
+            return getDistanceOfTwoPointsInKilometers(pointA, pointB) * 1000;
         }
 
         function showLocation(position) {
@@ -355,119 +395,124 @@
             drawPoints();
 
             map.addListener('click', function (e) {
-                const form = document.createElement('form');
-                form.id = "createPointForm";
-                form.innerHTML = `
-                    <style>
-                        #createPointForm {
-                            width: 300px;
-                        }
-                        #createPointForm button {
-                            padding: 7px 20px;
-                            font-size: 14px;
-                            height: 35px;
-                        }
-                        #mainText {
-                            font-size: 16px;
-                            padding-bottom: 10px;
-                            font-weight: bold;
-                        }
-                    </style>
-                    <input type="hidden" id="userLocationLongitude" name="UserLocationLongitude" value="${e.latLng.lng()}">
-                    <input type="hidden" id="userLocationLatitude" name="UserLocationLatitude" value="${e.latLng.lat()}">
-                    <div>
-                        <label id="mainText" for="name" class="form-label">ADD A POINT</label>
-                    </div>
-                    <div id="createPointErrorContainer" class="text-danger mb-2" role="alert"></div>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Location name</label>
-                        <span>
-                            <label class="text-danger" style="font-size: 12px">* Required</label>
-                        </span>
-                        <input type="text" id="name" name="Name" class="form-control" required placeholder="Name">
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea id="description" name="Description" class="form-control" placeholder="Description" rows="5"></textarea>
-                    </div>
-                    <div class="mb-3 d-flex justify-content-between">
-                        <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
-                        <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px">Cancel</button>
-                    </div>
-                `;
+                let distance = getDistanceInMeters(lastPos, { lat: e.latLng.lat(), lng: e.latLng.lng() });
+                if (distance <= 50) { 
+                    const form = document.createElement('form');
+                    form.id = "createPointForm";
+                    form.innerHTML = `
+                        <style>
+                            #createPointForm {
+                                width: 300px;
+                            }
+                            #createPointForm button {
+                                padding: 7px 20px;
+                                font-size: 14px;
+                                height: 35px;
+                            }
+                            #mainText {
+                                font-size: 16px;
+                                padding-bottom: 10px;
+                                font-weight: bold;
+                            }
+                        </style>
+                        <input type="hidden" id="userLocationLongitude" name="UserLocationLongitude" value="${e.latLng.lng()}">
+                        <input type="hidden" id="userLocationLatitude" name="UserLocationLatitude" value="${e.latLng.lat()}">
+                        <div>
+                            <label id="mainText" for="name" class="form-label">ADD A POINT</label>
+                        </div>
+                        <div id="createPointErrorContainer" class="text-danger mb-2" role="alert"></div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Location name</label>
+                            <span>
+                                <label class="text-danger" style="font-size: 12px">* Required</label>
+                            </span>
+                            <input type="text" id="name" name="Name" class="form-control" required placeholder="Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea id="description" name="Description" class="form-control" placeholder="Description" rows="5"></textarea>
+                        </div>
+                        <div class="mb-3 d-flex justify-content-between">
+                            <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
+                            <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px">Cancel</button>
+                        </div>
+                    `;
 
-                form.addEventListener('submit', function (event) {
-                    event.preventDefault();
+                    form.addEventListener('submit', function (event) {
+                        event.preventDefault();
 
-                    var formData = new FormData(form);
-                    var object = {};
-                    formData.forEach((value, key) => object[key] = value);
-                    var json = JSON.stringify(object);
+                        var formData = new FormData(form);
+                        var object = {};
+                        formData.forEach((value, key) => object[key] = value);
+                        var json = JSON.stringify(object);
 
-                    fetch('/Points/CreatePoint', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: json,
-                    }).then(response => {
-                        if (response.ok) {
-                            //console.log('Point created successfully');
-                            panelCreatePoint.close();
-                            drawPoints();
-                        } else {
-                            response.json().then(x => {
-                                var errorContainer = $("#createPointForm").find("#createPointErrorContainer")
-                                errorContainer.empty()
+                        fetch('/Points/CreatePoint', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: json,
+                        }).then(response => {
+                            if (response.ok) {
+                                //console.log('Point created successfully');
+                                panelCreatePoint.close();
+                                drawPoints();
+                            } else {
+                                response.json().then(x => {
+                                    var errorContainer = $("#createPointForm").find("#createPointErrorContainer")
+                                    errorContainer.empty()
 
-                                var errors = x.errors
-                                var errorKeys = Object.keys(errors);
+                                    var errors = x.errors
+                                    var errorKeys = Object.keys(errors);
 
-                                for (var i = 0; i < errorKeys.length; i++) {
-                                    var thisProp = errorKeys[i];
-                                    var array = errors[thisProp];
-                                    for (var ii = 0; ii < array.length; ii++) {
-                                        errorContainer.append($('<div>', {
-                                            text: array[ii]
-                                        }));
+                                    for (var i = 0; i < errorKeys.length; i++) {
+                                        var thisProp = errorKeys[i];
+                                        var array = errors[thisProp];
+                                        for (var ii = 0; ii < array.length; ii++) {
+                                            errorContainer.append($('<div>', {
+                                                text: array[ii]
+                                            }));
+                                        }
                                     }
-                                }
-                            });
-                        }
-                    });
-                });
-
-                if (isInfoWindowOpen(panelPointInfo) || isInfoWindowOpen(panelCreatePoint)) {
-                    if (isInfoWindowOpen(panelPointInfo))
-                        panelPointInfo.close();
-                    if (isInfoWindowOpen(panelCreatePoint))
-                        panelCreatePoint.close();
-                    return;
-                }
-
-                // If an info window already exists, reuse it
-                if (isInfoWindowOpen(panelCreatePoint)) {
-                }
-                else {
-                    // Create a new info window with the form as its content
-                    panelCreatePoint = new InfoWindow({
-                        content: form
-                    });
-                    panelCreatePoint.open(map);
-
-                    // Event listener to the close button of the info window to close it.
-                    // Using "domready" ensures that the dom is loaded and can find the component
-                    google.maps.event.addListener(panelCreatePoint, 'domready', function () {
-                        var cancelButton = document.getElementById('createPointCancel');
-                        if (!cancelButton) return;
-                        cancelButton.addEventListener('click', function () {
-                            panelCreatePoint.close();
+                                });
+                            }
                         });
                     });
-                }
 
-                // Open the info window at the clicked location
-                panelCreatePoint.setPosition(e.latLng);
+                    if (isInfoWindowOpen(panelPointInfo) || isInfoWindowOpen(panelCreatePoint)) {
+                        if (isInfoWindowOpen(panelPointInfo))
+                            panelPointInfo.close();
+                        if (isInfoWindowOpen(panelCreatePoint))
+                            panelCreatePoint.close();
+                        return;
+                    }
+
+                    // If an info window already exists, reuse it
+                    if (isInfoWindowOpen(panelCreatePoint)) {
+                    }
+                    else {
+                        // Create a new info window with the form as its content
+                        panelCreatePoint = new InfoWindow({
+                            content: form
+                        });
+                        panelCreatePoint.open(map);
+
+                        // Event listener to the close button of the info window to close it.
+                        // Using "domready" ensures that the dom is loaded and can find the component
+                        google.maps.event.addListener(panelCreatePoint, 'domready', function () {
+                            var cancelButton = document.getElementById('createPointCancel');
+                            if (!cancelButton) return;
+                            cancelButton.addEventListener('click', function () {
+                                panelCreatePoint.close();
+                            });
+                        });
+                    }
+
+                    // Open the info window at the clicked location
+                    panelCreatePoint.setPosition(e.latLng);
+                } else {
+                    console.log('You are too far away to create a point here.');
+                }
             });
 
             const centerControlDiv = document.createElement("div");
