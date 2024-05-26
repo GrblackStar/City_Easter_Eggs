@@ -106,41 +106,19 @@
                             console.error('Error:', error);
                         });
                     }
-                    // if (panelPointInfo_CurrentMarker) {
-                    //     console.log('Like button clicked');
-                    //     console.log(panelPointInfo_CurrentMarker.title);
-
-                    //     if (markerId == null) return;
-                    //     fetch('/Points/LikePoint', {
-                    //         method: 'POST',
-                    //         headers: {
-                    //             'Content-Type': 'application/json',
-                    //         },
-                    //         body: JSON.stringify({ markerId: markerId }),
-                    //     })
-                    //     .then(response => response.json())
-                    //     .then(data => {
-                    //         pointsFromBackend[pointIndex] = data
-
-                    //         // Update the likes label
-                    //         document.getElementById('likes').textContent = data.point.likes;
-                    //         // Change the like button image
-                    //         let likeButtonImage = document.querySelector('#likeButton img');
-                    //         likeButtonImage.src = 'LikedIcon.png';
-                    //     })
-                    //     .catch((error) => {
-                    //         console.error('Error:', error);
-                    //     });
-                    // }
                 };
 
+                let isFavoriteByUser = favoriteByUser;
                 let favoriteButtonListener = function () {
                     if (panelPointInfo_CurrentMarker) {
                         console.log('Favorite button clicked');
                         console.log(panelPointInfo_CurrentMarker.title);
 
+                        // Determine the endpoint based on whether the point is already saved by the user
+                        let endpoint = isFavoriteByUser ? '/Points/FavoriteRemovePoint' : '/Points/FavoriteAddPoint';
+
                         if (markerId == null) return;
-                        fetch('/Points/FavoriteAddPoint', {
+                        fetch(endpoint, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -152,7 +130,8 @@
                             pointsFromBackend[pointIndex] = data
                             // Change the like button image
                             let heartButtonImage = document.querySelector('#favoriteButton img');
-                            heartButtonImage.src = 'HeartedIcon.png';
+                            heartButtonImage.src = isFavoriteByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
+                            isFavoriteByUser = !isFavoriteByUser;
                         })
                         .catch((error) => {
                             console.error('Error:', error);

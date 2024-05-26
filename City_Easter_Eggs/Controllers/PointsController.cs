@@ -66,6 +66,13 @@ namespace City_Easter_Eggs.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> FavoriteRemovePoint(UpdatePointInputModel marker)
+        {
+            PointOfInterestFrontend pointLiked = await _service.FavoriteRemovePoint(marker.MarkerId);
+            return Ok(pointLiked);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CreatePoint(CreatePointInputModel input)
         {
             await _service.CreatePointAsync(input.Name, input.Description, input.UserLocationLongitude, input.UserLocationLatitude);
