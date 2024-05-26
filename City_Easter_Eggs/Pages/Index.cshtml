@@ -73,13 +73,18 @@
 
                 const { target } = domEvent;
 
+                let isLikedByUser = likedByUser;
                 let likeButtonListener = function () {
                     if (panelPointInfo_CurrentMarker) {
                         console.log('Like button clicked');
                         console.log(panelPointInfo_CurrentMarker.title);
 
                         if (markerId == null) return;
-                        fetch('/Points/LikePoint', {
+
+                        // Determine the endpoint based on whether the point is already liked by the user
+                        let endpoint = isLikedByUser ? '/Points/UnlikePoint' : '/Points/LikePoint';
+
+                        fetch(endpoint, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -92,14 +97,41 @@
 
                             // Update the likes label
                             document.getElementById('likes').textContent = data.point.likes;
-                            // Change the like button image
+                            // Change the like button image based on whether the point is liked by the user
                             let likeButtonImage = document.querySelector('#likeButton img');
-                            likeButtonImage.src = 'LikedIcon.png';
+                            likeButtonImage.src = isLikedByUser ? 'LikeIcon.png' : 'LikedIcon.png';
+                            isLikedByUser = !isLikedByUser;
                         })
                         .catch((error) => {
                             console.error('Error:', error);
                         });
                     }
+                    // if (panelPointInfo_CurrentMarker) {
+                    //     console.log('Like button clicked');
+                    //     console.log(panelPointInfo_CurrentMarker.title);
+
+                    //     if (markerId == null) return;
+                    //     fetch('/Points/LikePoint', {
+                    //         method: 'POST',
+                    //         headers: {
+                    //             'Content-Type': 'application/json',
+                    //         },
+                    //         body: JSON.stringify({ markerId: markerId }),
+                    //     })
+                    //     .then(response => response.json())
+                    //     .then(data => {
+                    //         pointsFromBackend[pointIndex] = data
+
+                    //         // Update the likes label
+                    //         document.getElementById('likes').textContent = data.point.likes;
+                    //         // Change the like button image
+                    //         let likeButtonImage = document.querySelector('#likeButton img');
+                    //         likeButtonImage.src = 'LikedIcon.png';
+                    //     })
+                    //     .catch((error) => {
+                    //         console.error('Error:', error);
+                    //     });
+                    // }
                 };
 
                 let favoriteButtonListener = function () {

@@ -116,6 +116,32 @@ namespace City_Easter_Eggs.Controllers
             return new PointOfInterestFrontend(point, currentUser);
         }
 
+        public async Task<PointOfInterestFrontend> UnLikePoint(string markerId)
+        {
+            ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
+            User? currentUser = await _userService.GetUserFromPrincipal(user);
+            currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
+
+            PointOfInterest? point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
+
+            if (point == null) return null;
+
+            LikedPoints? like = _context.LikedPoints.FirstOrDefault(l => l.User == currentUser && l.Point == point);
+
+            if (like == null) return null;
+
+            point.Likes--;
+            point.LikedPoints.Remove(like);
+            currentUser.LikedPoints.Remove(like);
+            point.Creator.LikesObtained--;
+
+            _context.LikedPoints.Remove(like);
+
+            await _context.SaveChangesAsync();
+            return new PointOfInterestFrontend(point, currentUser);
+        }
+
+
         public async Task CreatePointAsync(string name, string description, double longitude, double latitude)
         {
             var user = _httpContextAccessor.HttpContext?.User;

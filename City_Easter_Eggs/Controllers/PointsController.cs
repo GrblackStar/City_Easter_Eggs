@@ -51,9 +51,17 @@ namespace City_Easter_Eggs.Controllers
             return Ok(pointLiked);
         }
 
+        [HttpPost]
         public async Task<IActionResult> FavoriteAddPoint(UpdatePointInputModel marker)
         {
             PointOfInterestFrontend pointLiked = await _service.FavoriteAddPoint(marker.MarkerId);
+            return Ok(pointLiked);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnLikePoint(UpdatePointInputModel marker)
+        {
+            PointOfInterestFrontend pointLiked = await _service.UnLikePoint(marker.MarkerId);
             return Ok(pointLiked);
         }
 
