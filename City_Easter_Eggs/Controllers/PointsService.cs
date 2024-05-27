@@ -28,6 +28,7 @@ namespace City_Easter_Eggs.Controllers
         {
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             User? currentUser = await _userService.GetUserFromPrincipal(user);
+            currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
 
             var points = _context.POIs.Include(x => x.Creator);
             return points.Select(p => new PointOfInterestFrontend(p, currentUser));
@@ -68,7 +69,7 @@ namespace City_Easter_Eggs.Controllers
             return currentUser.LikedPoints.Select(x => x.PointId);
         }
 
-        public async Task<PointOfInterestFrontend> LikePoint(string markerId)
+        public async Task<PointOfInterestFrontend?> LikePoint(string markerId)
         {
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             User? currentUser = await _userService.GetUserFromPrincipal(user);
@@ -93,7 +94,7 @@ namespace City_Easter_Eggs.Controllers
             return new PointOfInterestFrontend(point, currentUser);
         }
 
-        public async Task<PointOfInterestFrontend> FavoriteAddPoint(string markerId)
+        public async Task<PointOfInterestFrontend?> FavoriteAddPoint(string markerId)
         {
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             User? currentUser = await _userService.GetUserFromPrincipal(user);
@@ -110,7 +111,7 @@ namespace City_Easter_Eggs.Controllers
             };
 
             point.FavoritedPoints.Add(like);
-            currentUser.FavoritedPoints.Add(like);
+            currentUser?.FavoritedPoints.Add(like);
 
             await _context.SaveChangesAsync();
             return new PointOfInterestFrontend(point, currentUser);
