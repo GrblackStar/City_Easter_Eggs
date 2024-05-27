@@ -17,6 +17,15 @@
             margin: 0px;
             padding: 0px
         }
+         @@keyframes fadein {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @@keyframes fadeout {
+            from { opacity: 1; }
+            to   { opacity: 0; }
+        }
     </style>
 
     <script type="module">
@@ -40,7 +49,7 @@
         let lastPos = null;
 
         var pointsFromBackend = [];
-        
+
         function AddPointToMap(pointIndex) {
             var pointData = pointsFromBackend[pointIndex];
             var thisPoint = pointData.point;
@@ -75,9 +84,6 @@
                 let isLikedByUser = likedByUser;
                 let likeButtonListener = function () {
                     if (panelPointInfo_CurrentMarker) {
-                        console.log('Like button clicked');
-                        console.log(panelPointInfo_CurrentMarker.title);
-
                         if (markerId == null) return;
 
                         // Calculate the distance between the user's current location and the marker's location in meters
@@ -106,17 +112,17 @@
                                     let likeButtonImage = document.querySelector('#likeButton img');
                                     likeButtonImage.src = isLikedByUser ? 'LikeIcon.png' : 'LikedIcon.png';
                                     isLikedByUser = !isLikedByUser;
-                                }, 150);
+                                }, 100);
                                 setTimeout(() => {
                                     this.classList.remove('animate');
-                                }, 300);
+                                }, 200);
                             })
                             .catch((error) => {
-                                console.error('Error:', error);
+                                showToast('Error:' + error, 'error');
                             });
                         } else {
                             // If the distance is more than 50 meters, log a message and do not make the fetch request
-                            console.log('You are too far away to like this point.');
+                            showToast('You are too far away to like this point.', 'error');
                         }
                     }
                 };
@@ -124,13 +130,9 @@
                 let isFavoriteByUser = favoriteByUser;
                 let favoriteButtonListener = function () {
                     if (panelPointInfo_CurrentMarker) {
-                        console.log('Favorite button clicked');
-                        console.log(panelPointInfo_CurrentMarker.title);
-
+                        if (markerId == null) return;
                         // Determine the endpoint based on whether the point is already saved by the user
                         let endpoint = isFavoriteByUser ? '/Points/FavoriteRemovePoint' : '/Points/FavoriteAddPoint';
-
-                        if (markerId == null) return;
                         fetch(endpoint, {
                             method: 'POST',
                             headers: {
@@ -148,13 +150,13 @@
                                 let heartButtonImage = document.querySelector('#favoriteButton img');
                                 heartButtonImage.src = isFavoriteByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
                                 isFavoriteByUser = !isFavoriteByUser;
-                            }, 150);
+                            }, 100);
                             setTimeout(() => {
                                 this.classList.remove('animate');
-                            }, 300);
+                            }, 200);
                         })
                         .catch((error) => {
-                            console.error('Error:', error);
+                            showToast('Error:' + error, 'error');
                         });
                     }
                 };
@@ -288,7 +290,7 @@
             }
             oldMarkers = [];
         }
-        // used for small distance calculations, as it ignores the curvature of 
+        // used for small distance calculations, as it ignores the curvature of Earth
         function GetPosDist(pointA, pointB) {
             var a = pointA.lat - pointB.lat;
             var b = pointA.lng - pointB.lng;
@@ -334,7 +336,7 @@
             if (lastPos != null) {
                 var dist = GetPosDist(lastPos, pos);
                 console.log(dist);
-                if (dist < 0.001) return;
+                if (dist < 0.0001) return;
             }
             lastPos = pos;
 
@@ -347,11 +349,7 @@
             else {
                 // If it does exist, update its position.
                 userMarker.position = pos;
-                //userMarker.setPosition(pos);
             }
-
-            //const center = new google.maps.LatLng(latitude, longitude);
-            //map.panTo(center);
 
             console.log("Latitude : " + latitude + " Longitude: " + longitude);
         }
@@ -361,16 +359,19 @@
                 let position = await GetUserLocation();
                 showLocation(position);
             } else {
-                alert("Sorry, browser does not support geolocation!");
+                //alert("Sorry, browser does not support geolocation!");
+                showToast('Sorry, browser does not support geolocation!', 'error');
             }
             setTimeout(updateLocation, 2000)
         }
 
         function errorHandler(err) {
             if (err.code == 1) {
-                alert("Error: Access is denied!");
+                //alert("Error: Access is denied!");
+                showToast('Error: Access is denied!', 'error');
             } else if (err.code == 2) {
-                alert("Error: Position is unavailable!");
+                //alert("Error: Position is unavailable!");
+                showToast('Error: Position is unavailable!', 'error');
             }
         }
 
@@ -470,6 +471,7 @@
                         }).then(response => {
                             if (response.ok) {
                                 //console.log('Point created successfully');
+                                showToast('You have created a point.', 'success');
                                 panelCreatePoint.close();
                                 drawPoints();
                             } else {
@@ -526,7 +528,8 @@
                     // Open the info window at the clicked location
                     panelCreatePoint.setPosition(e.latLng);
                 } else {
-                    console.log('You are too far away to create a point here.');
+                    //console.log('You are too far away to create a point here.');
+                    showToast('You are too far away to create a point here.', 'error');
                     if (isInfoWindowOpen(panelPointInfo) || isInfoWindowOpen(panelCreatePoint)) {
                         if (isInfoWindowOpen(panelPointInfo))
                             panelPointInfo.close();
@@ -544,6 +547,95 @@
             map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerControlDiv);
         }
 
+        function showToast(message, type) {
+            // Check if a toast already exists, so it doesn't open multiple at the same time
+            if (document.querySelector('.toast')) {
+                return;
+            }
+            
+            // Create toast container if it doesn't exist
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.style.position = 'fixed';
+                toastContainer.style.top = '20px';
+                toastContainer.style.left = '50%';
+                toastContainer.style.transform = 'translateX(-50%)';
+                toastContainer.style.zIndex = '9999';
+                toastContainer.style.display = 'flex';
+                toastContainer.style.justifyContent = 'center';
+                toastContainer.style.alignItems = 'center';
+                toastContainer.style.pointerEvents = 'none';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Create toast
+            const toast = document.createElement('div');
+            toast.className = 'toast'; // for easy selection
+            toast.style.background = type === 'success' ? '#689F38' : '#CF1A2B';
+            toast.style.color = 'white';
+            toast.style.padding = '5px';
+            toast.style.minWidth = '400px';
+            toast.style.maxWidth = 'auto';
+            toast.style.borderRadius = '7px';
+            toast.style.boxShadow = '0 0.125rem 0.25rem grey';
+            toast.style.fontSize = '14px';
+            toast.style.display = 'flex';
+            toast.style.justifyContent = 'space-between';
+            toast.style.alignItems = 'center';
+            toast.style.animation = 'fadein 0.5s, fadeout 0.5s 2.5s';
+
+            // Icon
+            const icon = document.createElement('img');
+            icon.src = type === 'success' ? 'CheckIcon.svg' : 'CloseIcon.svg';
+            icon.style.width = '14px';
+            icon.style.height = '14px';
+            icon.style.marginRight = '10px';
+            icon.style.marginLeft = '7px';
+            icon.style.filter = 'invert(1)'; // Makes the icon white
+            toast.appendChild(icon);
+
+            // Message
+            const toastMessage = document.createElement('span');
+            toastMessage.textContent = message;
+            toast.appendChild(toastMessage);
+
+            // Dismiss button
+            const dismissButton = document.createElement('button');
+            dismissButton.textContent = 'Dismiss';
+            dismissButton.style.background = 'transparent';
+            dismissButton.style.border = 'none';
+            dismissButton.style.fontSize = '14px';
+            dismissButton.style.marginRight = '7px';
+            dismissButton.style.color = 'white';
+            dismissButton.style.textDecoration = 'underline';
+            dismissButton.style.cursor = 'pointer';
+            dismissButton.style.pointerEvents = 'auto';
+            dismissButton.addEventListener('click', () => {
+                toastContainer.removeChild(toast);
+                if (!toastContainer.firstChild) {
+                    toastContainer.remove();
+                }
+                console.log('Toast dismissed');
+            });
+            toast.appendChild(dismissButton);
+
+            // Add toast to container
+            toastContainer.appendChild(toast);
+
+            // Remove toast after 2.95 seconds -> a little before it fades out
+            setTimeout(() => {
+                if (toast.parentNode === toastContainer) {
+                    toastContainer.removeChild(toast);
+                    if (!toastContainer.firstChild) {
+                        toastContainer.remove();
+                    }
+                }
+            }, 2950);
+        }
+
+        
         
 
         await initMap();
