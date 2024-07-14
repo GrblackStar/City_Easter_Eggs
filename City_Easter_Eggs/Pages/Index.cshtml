@@ -349,6 +349,7 @@
             else {
                 // If it does exist, update its position.
                 userMarker.position = pos;
+                showToast('Your current location changed', 'success');
             }
 
             console.log("Latitude : " + latitude + " Longitude: " + longitude);
@@ -576,8 +577,7 @@
             toast.style.background = type === 'success' ? '#689F38' : '#CF1A2B';
             toast.style.color = 'white';
             toast.style.padding = '5px';
-            toast.style.minWidth = '400px';
-            toast.style.maxWidth = 'auto';
+            toast.style.minWidth = '300px';
             toast.style.borderRadius = '7px';
             toast.style.boxShadow = '0 0.125rem 0.25rem grey';
             toast.style.fontSize = '14px';
@@ -599,6 +599,7 @@
             // Message
             const toastMessage = document.createElement('span');
             toastMessage.textContent = message;
+            toastMessage.style.whiteSpace = 'nowrap';
             toast.appendChild(toastMessage);
 
             // Dismiss button
@@ -606,7 +607,7 @@
             dismissButton.textContent = 'Dismiss';
             dismissButton.style.background = 'transparent';
             dismissButton.style.border = 'none';
-            dismissButton.style.fontSize = '14px';
+            dismissButton.style.fontSize = '12px';
             dismissButton.style.marginRight = '7px';
             dismissButton.style.color = 'white';
             dismissButton.style.textDecoration = 'underline';
@@ -623,6 +624,7 @@
 
             // Add toast to container
             toastContainer.appendChild(toast);
+            toast.style.width = `${toastMessage.offsetWidth + 120}px`;
 
             // Remove toast after 2.95 seconds -> a little before it fades out
             setTimeout(() => {
