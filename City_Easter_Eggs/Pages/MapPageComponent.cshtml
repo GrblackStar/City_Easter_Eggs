@@ -269,7 +269,15 @@
                     panelPointInfo.close();
 
                 panelPointInfo = new InfoWindow();
-                panelPointInfo.setContent(marker.title);
+                panelPointInfo.setContent(`
+                    <style>
+                        #infoWindowContent {
+                            min-width: 150px;
+                            font-size: 16px;
+                            font-weight: bold;
+                        }
+                    </style>
+                    <div id="infoWindowContent">${marker.title}</div>`);
                 panelPointInfo.open(marker.map, marker);
 
                 panelPointInfo_CurrentMarker = marker;
@@ -343,8 +351,8 @@
 
             if (lastPos != null) {
                 var dist = GetPosDist(lastPos, pos);
-                console.log(dist);
                 if (dist < 0.0001) return;
+                console.log("Moved Distance", dist);
             }
             lastPos = pos;
 
@@ -360,7 +368,7 @@
                 showToast('Your current location changed', 'success');
             }
 
-            console.log("Latitude : " + latitude + " Longitude: " + longitude);
+            console.log("You are at", "Latitude : " + latitude + " Longitude: " + longitude);
         }
 
         async function updateLocation() {
