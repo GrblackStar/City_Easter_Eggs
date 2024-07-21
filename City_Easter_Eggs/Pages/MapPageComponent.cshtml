@@ -16,16 +16,23 @@
         }
 
         /* TABLE STYLING */
+        .table-container {
+            width: 100%;
+            max-height: 700px;
+            overflow-y: auto;
+            margin-top: 80px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+        }
+
         #pointsTable {
             width: 100%;
             border-collapse: collapse;
             font-family: 'Arial', sans-serif;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-            margin-top: 80px;
         }
 
+
         #pointsTable thead tr {
-                background-color: #404040 !important;
+            background-color: #404040 !important;
             color: #ffffff;
         }
 
@@ -331,7 +338,9 @@
             for (let i = 0; i < pointsFromBackend.length; i++) {
                 const pointData = pointsFromBackend[i];
                 const point = pointData.point;
-                newMarkers[i] = AddPointToMap(i);
+                var marker = AddPointToMap(i);
+                newMarkers[i] = marker;
+                newMarkers[point.pointId] = marker;
 
                 // Create a new row and cells for the point
                 var row = tableBody.insertRow();
@@ -341,6 +350,21 @@
                 nameCell.textContent = point.name;
                 latitudeCell.textContent = point.latitude;
                 longitudeCell.textContent = point.longitude;
+
+                row.addEventListener('click', function () {
+                    console.log(`Point Name: ${point.name}`);
+                    if (map != null && point.latitude != null && point.longitude != null) {
+                        var markerClicked = newMarkers[point.pointId];
+                        markerClicked.content.classList.add("bounce");
+                        setTimeout(() => {
+                            markerClicked.content.classList.remove("bounce");
+                        }, 2000);
+
+                        // center the map to the point and scroll up to the map
+                        map.panTo({ lat: point.latitude, lng: point.longitude });
+                        scrollToMap();
+                    }
+                });
             }
 
             // Remove old markers after drawing new ones and swap the arrays for the next draw
@@ -354,12 +378,20 @@
             }
             oldMarkers = [];
         }
+
         // used for small distance calculations, as it ignores the curvature of Earth
         function GetPosDist(pointA, pointB) {
             var a = pointA.lat - pointB.lat;
             var b = pointA.lng - pointB.lng;
 
             return Math.sqrt(a * a + b * b);
+        }
+
+        function scrollToMap() {
+            var mapElement = document.getElementById('map');
+            if (mapElement) {
+                mapElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function getDistanceOfTwoPointsInKilometers(pointA, pointB) {
@@ -424,7 +456,6 @@
                 let position = await GetUserLocation();
                 showLocation(position);
             } else {
-                //alert("Sorry, browser does not support geolocation!");
                 showToast('Sorry, browser does not support geolocation!', 'error');
             }
             setTimeout(updateLocation, 2000)
@@ -432,10 +463,8 @@
 
         function errorHandler(err) {
             if (err.code == 1) {
-                //alert("Error: Access is denied!");
                 showToast('Error: Access is denied!', 'error');
             } else if (err.code == 2) {
-                //alert("Error: Position is unavailable!");
                 showToast('Error: Position is unavailable!', 'error');
             }
         }
@@ -707,18 +736,20 @@
 </head>
 <body>
     <div style="height: 700px" id="map"></div>
-    <table id="pointsTable">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows are added dynamically -->
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table id="pointsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows are added dynamically -->
+            </tbody>
+        </table>
+    </div>
 
 
 
