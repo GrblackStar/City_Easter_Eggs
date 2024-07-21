@@ -424,6 +424,83 @@
             return getDistanceOfTwoPointsInKilometers(pointA, pointB) * 1000;
         }
 
+        function showRadius(radius, position) {
+            // "#4287f5"
+            // #6d0cad
+            var circle = new google.maps.Circle({
+                strokeColor: "#9a00ff",
+                strokeOpacity: 0.7,
+                strokeWeight: 3,
+                fillColor: "#9a00ff",
+                fillOpacity: 0.1,
+                map: map,
+                center: position,
+                radius: radius,
+            });
+        }
+
+        function drawCircle(point, radius, dir) {
+            var d2r = Math.PI / 180; // degrees to radians 
+            var r2d = 180 / Math.PI; // radians to degrees 
+            var earthsradius = 6371 * 1000;
+            var points = 128;
+
+            // find the raidus in lat/lon 
+            var rlat = (radius / earthsradius) * r2d;
+            var rlng = rlat / Math.cos(point.lat * d2r);
+
+            var extp = new Array();
+            // one extra here makes sure we connect the ends
+            if (dir == 1) {
+                var start = 0;
+                var end = points + 1
+            } 
+            else {
+                var start = points + 1;
+                var end = 0
+            }
+            for (var i = start;
+                (dir == 1 ? i < end : i > end); i = i + dir) {
+                var theta = Math.PI * (i / (points / 2));
+                
+                var ey = point.lng + (rlng * Math.cos(theta)); // center a + radius x * cos(theta) 
+                var ex = point.lat + (rlat * Math.sin(theta)); // center b + radius y * sin(theta) 
+                
+                extp.push(new google.maps.LatLng(ex, ey));
+            }
+            return extp;
+        }
+
+        function showOutsideCircle(center, radius) {
+            var outerbounds = [
+                new google.maps.LatLng(85, 180),
+                new google.maps.LatLng(85, 90),
+                new google.maps.LatLng(85, 0),
+                new google.maps.LatLng(85, -90),
+                new google.maps.LatLng(85, -180),
+                new google.maps.LatLng(0, -180),
+                new google.maps.LatLng(-85, -180),
+                new google.maps.LatLng(-85, -90),
+                new google.maps.LatLng(-85, 0),
+                new google.maps.LatLng(-85, 90),
+                new google.maps.LatLng(-85, 180),
+                new google.maps.LatLng(0, 180),
+                new google.maps.LatLng(85, 180)
+            ];
+
+            var circle = {
+                strokeColor: '#FF0000',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#FF0000',
+                fillOpacity: 0.35,
+                map: map,
+                paths: [outerbounds, drawCircle(center, radius, -1)]
+            };
+            // Add the circle to the map.
+            var outsideCircle = new google.maps.Polygon(circle);
+        }
+
         function showLocation(position) {
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
@@ -732,6 +809,8 @@
 
         await initMap();
         await updateLocation();
+        showRadius(5000, lastPos);
+        showOutsideCircle(lastPos, 5000);
     </script>
 </head>
 <body>
