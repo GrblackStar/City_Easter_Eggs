@@ -127,7 +127,9 @@
         let lastPos = null;
 
         var pointsFromBackend = [];
-        let showInRadius = false;
+        var showInRadius = false;
+        let currentOutsideCircle = null;
+        let currentInnerCircle = null;
 
         function AddPointToMap(pointIndex) {
             var pointData = pointsFromBackend[pointIndex];
@@ -393,7 +395,7 @@
 
                         // center the map to the point and scroll up to the map
                         map.panTo({ lat: point.latitude, lng: point.longitude });
-                        window.scrollToMap();
+                        scrollToMap();
                     }
                 });
             }
@@ -418,7 +420,7 @@
             return Math.sqrt(a * a + b * b);
         }
 
-        window.scrollToMap = function() {
+        function scrollToMap() {
             var mapElement = document.getElementById('map');
             if (mapElement) {
                 mapElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -455,19 +457,20 @@
             return getDistanceOfTwoPointsInKilometers(pointA, pointB) * 1000;
         }
 
-        function showRadius(radius, position) {
+        function showInnerCircle(radius, position) {
             // "#4287f5"
             // #6d0cad
-            var circle = new google.maps.Circle({
+            currentInnerCircle = new google.maps.Circle({
                 strokeColor: "#9a00ff",
                 strokeOpacity: 0.7,
                 strokeWeight: 3,
-                fillColor: "#9a00ff",
-                fillOpacity: 0.1,
+                fillColor: "#000000",
+                fillOpacity: 0,
                 map: map,
                 center: position,
                 radius: radius,
-                clickable: false
+                clickable: false,
+                zIndex: 100
             });
         }
 
@@ -503,7 +506,9 @@
             return extp;
         }
 
-        function showOutsideCircle(center, radius) {
+        function showOutsideCircle(radius, center) {
+            removeCircle(currentOutsideCircle);
+            if (!showInRadius) return;
             var outerbounds = [
                 new google.maps.LatLng(85, 180),
                 new google.maps.LatLng(85, 90),
@@ -521,17 +526,24 @@
             ];
 
             var circle = {
-                strokeColor: '#FF0000',
+                strokeColor: '#000000',
                 strokeOpacity: 0.8,
                 strokeWeight: 2,
-                fillColor: '#FF0000',
-                fillOpacity: 0.35,
+                fillColor: '#000000',
+                fillOpacity: 0.65,
                 map: map,
                 paths: [outerbounds, drawCircle(center, radius, -1)],
                 clickable: false
             };
             // Add the circle to the map.
-            var outsideCircle = new google.maps.Polygon(circle);
+            currentOutsideCircle = new google.maps.Polygon(circle);
+        }
+
+        function removeCircle(currentCircle) {
+            if (currentCircle) {
+                currentCircle.setMap(null);
+                currentCircle = null;
+            }
         }
 
         function showLocation(position) {
@@ -553,9 +565,14 @@
                 userMarker.zIndex = 99999999;
             }
             else {
-                // If it does exist, update its position.
+                // If it does exist, update its position. Redraw the inner circle if the user has moved.
                 userMarker.position = pos;
+                removeCircle(currentInnerCircle);
+                removeCircle(currentOutsideCircle);
+                showInnerCircle(5000, pos);
+                showOutsideCircle(5000, pos);
                 showToast('Your current location changed', 'success');
+                // if showInRadius is true, redraw the points
             }
 
             console.log("You are at", "Latitude : " + latitude + " Longitude: " + longitude);
@@ -840,10 +857,15 @@
             }, 2950);
         }
 
+        window.updateOnRadiusChange = function(val) {
+            showInRadius = val;
+            // get points in radius
+            showOutsideCircle(5000, lastPos);
+        }
+
         await initMap();
         await updateLocation();
-        showRadius(5000, lastPos);
-        showOutsideCircle(lastPos, 5000);
+        showInnerCircle(5000, lastPos);
     </script>
 </head>
 <body>
@@ -887,10 +909,7 @@
         }
 
         function toggleShowInRadius() {
-            showInRadius = document.getElementById('toggleShowInRadius').checked;
-            //console.log("showInRadius:", showInRadius);
-            // call functions...
-            //window.scrollToMap();
+            window.updateOnRadiusChange(document.getElementById('toggleShowInRadius').checked);
         }
         
         // tooltip position strategy
