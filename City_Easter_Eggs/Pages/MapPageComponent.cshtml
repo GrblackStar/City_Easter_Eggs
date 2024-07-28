@@ -15,6 +15,36 @@
             padding: 0px
         }
 
+        .info-icon {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .info-icon .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position the tooltip above the icon */
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
+
+        .info-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
         /* TABLE STYLING */
         .table-container {
             width: 100%;
@@ -97,6 +127,7 @@
         let lastPos = null;
 
         var pointsFromBackend = [];
+        let showInRadius = false;
 
         function AddPointToMap(pointIndex) {
             var pointData = pointsFromBackend[pointIndex];
@@ -362,7 +393,7 @@
 
                         // center the map to the point and scroll up to the map
                         map.panTo({ lat: point.latitude, lng: point.longitude });
-                        scrollToMap();
+                        window.scrollToMap();
                     }
                 });
             }
@@ -387,7 +418,7 @@
             return Math.sqrt(a * a + b * b);
         }
 
-        function scrollToMap() {
+        window.scrollToMap = function() {
             var mapElement = document.getElementById('map');
             if (mapElement) {
                 mapElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -436,6 +467,7 @@
                 map: map,
                 center: position,
                 radius: radius,
+                clickable: false
             });
         }
 
@@ -495,7 +527,8 @@
                 fillColor: '#FF0000',
                 fillOpacity: 0.35,
                 map: map,
-                paths: [outerbounds, drawCircle(center, radius, -1)]
+                paths: [outerbounds, drawCircle(center, radius, -1)],
+                clickable: false
             };
             // Add the circle to the map.
             var outsideCircle = new google.maps.Polygon(circle);
@@ -815,6 +848,16 @@
 </head>
 <body>
     <div style="height: 700px" id="map"></div>
+    <div>
+        <input type="checkbox" id="toggleShowInRadius" onclick="toggleShowInRadius()"> Show points in 5 km radius
+        <span class="info-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="7.5" stroke="black"/>
+                <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
+            </svg>
+            <span class="tooltip-text">This option will display points within a 5 km radius from the center of the map.</span>
+        </span>
+    </div>
     <div class="table-container">
         <table id="pointsTable">
             <thead>
@@ -842,6 +885,31 @@
             var map = infoWindow.getMap();
             return (map !== null && typeof map !== "undefined");
         }
+
+        function toggleShowInRadius() {
+            showInRadius = document.getElementById('toggleShowInRadius').checked;
+            //console.log("showInRadius:", showInRadius);
+            // call functions...
+            //window.scrollToMap();
+        }
+        
+        // tooltip position strategy
+        document.addEventListener('DOMContentLoaded', function () {
+            const infoIcon = document.querySelector('.info-icon');
+            const tooltip = infoIcon.querySelector('.tooltip-text');
+            infoIcon.addEventListener('mouseover', function () {
+                const rect = tooltip.getBoundingClientRect();
+                const isVisible = (rect.top >= 0) && (rect.left >= 0) && (rect.bottom <= window.innerHeight) && (rect.right <= window.innerWidth);
+
+                if (!isVisible) {
+                    tooltip.style.bottom = 'auto';
+                    tooltip.style.top = '125%';
+                } else {
+                    tooltip.style.bottom = '125%';
+                    tooltip.style.top = 'auto';
+                }
+            });
+        });
     </script>
 </body>
 </html>
