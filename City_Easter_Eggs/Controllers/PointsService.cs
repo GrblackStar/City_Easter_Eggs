@@ -2,6 +2,7 @@
 
 using City_Easter_Eggs.Data;
 using City_Easter_Eggs.Models;
+using City_Easter_Eggs.QuadTree;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using System.Security.Claims;
@@ -17,11 +18,28 @@ namespace City_Easter_Eggs.Controllers
         private IHttpContextAccessor _httpContextAccessor;
         private UserService _userService;
 
+        private static QuadTree<PointOfInterest> _quadTree;
+
         public PointsService(ILogger<PointsService> logger, ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, UserService userService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _userService = userService;
+            
+            // otherwise it will be created and every time for each user
+            if(_quadTree == null)
+            {
+                _quadTree = new QuadTree<PointOfInterest>(new Rectangle(-85, -180, 85 * 2, 180 * 2));
+
+                var points = _context.POIs.Include(x => x.Creator);
+                foreach (var point in points)
+                {
+                    _quadTree.AddObject(point);
+                }
+            }
+            
+
+            //_quadTree.GetObjectsIntersectingShape()
         }
 
         public async Task<IEnumerable<PointOfInterestFrontend>> GetPoints()
@@ -30,7 +48,10 @@ namespace City_Easter_Eggs.Controllers
             User? currentUser = await _userService.GetUserFromPrincipal(user);
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
 
-            var points = _context.POIs.Include(x => x.Creator);
+            var points = new List<PointOfInterest>();
+            //_quadTree.GetAllObjects(points);
+            var circle = new Circle(42.631168f, 23.3832448f, 0.04496608029593653f);
+            _quadTree.GetObjectsIntersectingShape(points, circle);
             return points.Select(p => new PointOfInterestFrontend(p, currentUser));
         }
 
@@ -172,17 +193,20 @@ namespace City_Easter_Eggs.Controllers
             var currentUser = await _userService.GetUserFromPrincipal(user);
 
             if (description == null) description = "No Description";
-            
-            _context.POIs.Add(new PointOfInterest
-            {
-                Name = name,
-                Description = description,
-                Latitude = latitude,
-                Longitude = longitude,
-                Creator = currentUser
-            });
 
+            var point = (new PointOfInterest
+			{
+				Name = name,
+				Description = description,
+				Latitude = latitude,
+				Longitude = longitude,
+				Creator = currentUser
+			});
+
+            _context.POIs.Add(point);
             await _context.SaveChangesAsync();
+
+            _quadTree.AddObject(point);
         }
     }
 

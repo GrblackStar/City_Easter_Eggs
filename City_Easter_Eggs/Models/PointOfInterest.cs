@@ -1,7 +1,9 @@
 ﻿#region Using
 
+using City_Easter_Eggs.QuadTree;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
 using System.Text.Json.Serialization;
 
 #endregion
@@ -9,7 +11,7 @@ using System.Text.Json.Serialization;
 namespace City_Easter_Eggs.Models
 {
     [PrimaryKey("PointId")]
-    public class PointOfInterest
+    public class PointOfInterest : IQuadTreeObject
     {
         public string PointId { get; set; }
 
@@ -38,5 +40,10 @@ namespace City_Easter_Eggs.Models
             TimeStamp = (long) DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds;
             Likes = 0;
         }
-    }
+
+		public Vector2 GetPosition()
+		{
+            return new Vector2((float)Latitude, (float)Longitude);
+		}
+	}
 }
