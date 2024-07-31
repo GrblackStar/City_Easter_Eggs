@@ -3,6 +3,7 @@
 using City_Easter_Eggs.Data;
 using City_Easter_Eggs.Models;
 using City_Easter_Eggs.QuadTree;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using System.Security.Claims;
@@ -50,8 +51,8 @@ namespace City_Easter_Eggs.Controllers
 
             var points = new List<PointOfInterest>();
             //_quadTree.GetAllObjects(points);
-            var circle = new Circle(42.631168f, 23.3832448f, 0.04496608029593653f);
-            _quadTree.GetObjectsIntersectingShape(points, circle);
+            var ellipse = new Ellipse(42.631168f, 23.3832448f, 0.04496608029593653f, 0.04496608029593653f);
+            _quadTree.GetObjectsIntersectingShape(points, ellipse);
             return points.Select(p => new PointOfInterestFrontend(p, currentUser));
         }
 

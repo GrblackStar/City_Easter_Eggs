@@ -4,6 +4,7 @@ using City_Easter_Eggs.QuadTree;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
+using System.Security.Policy;
 using System.Text.Json.Serialization;
 
 #endregion
@@ -45,5 +46,11 @@ namespace City_Easter_Eggs.Models
 		{
             return new Vector2((float)Latitude, (float)Longitude);
 		}
-	}
+
+        public Rectangle GetBounds()
+        {
+            Vector2 objectPos = GetPosition();
+            return new Rectangle(objectPos, new Vector2(MathHelper.MetersToEarthRadiusRadian(1)));
+        }
+    }
 }
