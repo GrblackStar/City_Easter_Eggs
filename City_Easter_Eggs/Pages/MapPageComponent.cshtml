@@ -359,9 +359,9 @@
             return marker;
         }
 
-        async function drawPoints(longitude, latitude) {
+        async function drawPoints() {
             // var httpGetPoints = await HttpGet("/Points/GetPoints");
-            var url = `/Points/GetPoints?Longitude=${longitude}&Latitude=${latitude}&ShowInRadius=${showInRadius}`;
+            var url = `/Points/GetPoints?Longitude=${lastPos.lng}&Latitude=${lastPos.lat}&ShowInRadius=${showInRadius}`;
             var httpGetPoints = await HttpGet(url);
             pointsFromBackend = JSON.parse(httpGetPoints);
 
@@ -570,6 +570,7 @@
             else {
                 // If it does exist, update its position. Redraw the inner circle if the user has moved.
                 userMarker.position = pos;
+                if (showInRadius) drawPoints();
                 removeCircle(currentInnerCircle);
                 removeCircle(currentOutsideCircle);
                 showInnerCircle(5000, pos);
@@ -632,7 +633,7 @@
             });
 
             showLocation(myPos);
-            drawPoints(position.lng, position.lat);
+            drawPoints();
 
             map.addListener('click', function (e) {
                 let distance = getDistanceInMeters(lastPos, { lat: e.latLng.lat(), lng: e.latLng.lng() });
@@ -697,7 +698,7 @@
                                 //console.log('Point created successfully');
                                 showToast('You have created a point.', 'success');
                                 panelCreatePoint.close();
-                                drawPoints(position.lng, position.lat);
+                                drawPoints();
                             } else {
                                 response.json().then(x => {
                                     var errorContainer = $("#createPointForm").find("#createPointErrorContainer")
@@ -860,17 +861,25 @@
             }, 2950);
         }
 
+
+
+        async function updatePoints() {
+            // this gets the points more frequently -> 5 minutes
+            await drawPoints();
+            setTimeout(updatePoints, 300000);
+        }
+
         window.updateOnRadiusChange = function(val) {
             showInRadius = val;
             // get points in radius
             showOutsideCircle(5000, lastPos);
-            //debugger;
-            drawPoints(lastPos.lng, lastPos.lat);
+            drawPoints();
         }
 
         await initMap();
         await updateLocation();
         showInnerCircle(5000, lastPos);
+        await updatePoints();
     </script>
 </head>
 <body>
