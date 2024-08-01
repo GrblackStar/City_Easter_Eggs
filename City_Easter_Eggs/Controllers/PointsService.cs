@@ -43,7 +43,7 @@ namespace City_Easter_Eggs.Controllers
             //_quadTree.GetObjectsIntersectingShape()
         }
 
-        public async Task<IEnumerable<PointOfInterestFrontend>> GetPoints()
+        public async Task<IEnumerable<PointOfInterestFrontend>> GetPoints(float Longitude, float Latitude, bool ShowInRadius)
         {
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             User? currentUser = await _userService.GetUserFromPrincipal(user);
@@ -51,8 +51,12 @@ namespace City_Easter_Eggs.Controllers
 
             var points = new List<PointOfInterest>();
             //_quadTree.GetAllObjects(points);
-            var ellipse = new Ellipse(42.631168f, 23.3832448f, 0.04496608029593653f, 0.04496608029593653f);
-            _quadTree.GetObjectsIntersectingShape(points, ellipse);
+            if (ShowInRadius)
+            {
+                var ellipse = new Ellipse(Latitude, Longitude, 0.04496608029593653f, 0.04496608029593653f);
+                _quadTree.GetObjectsIntersectingShape(points, ellipse);
+            }
+            else _quadTree.GetAllObjects(points);
             return points.Select(p => new PointOfInterestFrontend(p, currentUser));
         }
 

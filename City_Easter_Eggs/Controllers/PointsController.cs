@@ -27,9 +27,10 @@ namespace City_Easter_Eggs.Controllers
             _service = service;
         }
 
-        public Task<IEnumerable<PointOfInterestFrontend>> GetPoints()
+        [HttpGet]
+        public Task<IEnumerable<PointOfInterestFrontend>> GetPoints([FromQuery] UserRadiusInputModel userRadius)
         {
-            return _service.GetPoints();
+            return _service.GetPoints(userRadius.Longitude, userRadius.Latitude, userRadius.ShowInRadius);
         }
 
         public async Task<IActionResult> GetPointDetails(UpdatePointInputModel marker)
@@ -111,6 +112,13 @@ namespace City_Easter_Eggs.Controllers
         public class UpdatePointInputModel
         {
             public string MarkerId { get; set; }
+        }
+
+        public class UserRadiusInputModel
+        {
+            public float Longitude { get; set; }
+            public float Latitude { get; set; }
+            public bool ShowInRadius { get; set; }
         }
     }
 }

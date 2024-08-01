@@ -359,8 +359,10 @@
             return marker;
         }
 
-        async function drawPoints() {
-            var httpGetPoints = await HttpGet("/Points/GetPoints");
+        async function drawPoints(longitude, latitude) {
+            // var httpGetPoints = await HttpGet("/Points/GetPoints");
+            var url = `/Points/GetPoints?Longitude=${longitude}&Latitude=${latitude}&ShowInRadius=${showInRadius}`;
+            var httpGetPoints = await HttpGet(url);
             pointsFromBackend = JSON.parse(httpGetPoints);
 
             var newMarkers = [];
@@ -400,6 +402,7 @@
                 });
             }
 
+            await new Promise((resolve) => setTimeout(resolve, 50));
             // Remove old markers after drawing new ones and swap the arrays for the next draw
             removeOldMarkers();
             oldMarkers = newMarkers;
@@ -629,7 +632,7 @@
             });
 
             showLocation(myPos);
-            drawPoints();
+            drawPoints(position.lng, position.lat);
 
             map.addListener('click', function (e) {
                 let distance = getDistanceInMeters(lastPos, { lat: e.latLng.lat(), lng: e.latLng.lng() });
@@ -694,7 +697,7 @@
                                 //console.log('Point created successfully');
                                 showToast('You have created a point.', 'success');
                                 panelCreatePoint.close();
-                                drawPoints();
+                                drawPoints(position.lng, position.lat);
                             } else {
                                 response.json().then(x => {
                                     var errorContainer = $("#createPointForm").find("#createPointErrorContainer")
@@ -861,6 +864,8 @@
             showInRadius = val;
             // get points in radius
             showOutsideCircle(5000, lastPos);
+            //debugger;
+            drawPoints(lastPos.lng, lastPos.lat);
         }
 
         await initMap();
