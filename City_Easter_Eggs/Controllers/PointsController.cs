@@ -33,18 +33,6 @@ namespace City_Easter_Eggs.Controllers
             return _service.GetPoints(userRadius.Longitude, userRadius.Latitude, userRadius.ShowInRadius);
         }
 
-        public async Task<IActionResult> GetPointDetails(UpdatePointInputModel marker)
-        {
-            var pointDetails = await _service.GetPointDetailsAsync(marker.MarkerId);
-
-            if (pointDetails == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(pointDetails);
-        }
-
         [HttpPost]
         public async Task<IActionResult> LikePoint(UpdatePointInputModel marker)
         {

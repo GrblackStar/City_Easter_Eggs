@@ -38,9 +38,6 @@ namespace City_Easter_Eggs.Controllers
                     _quadTree.AddObject(point);
                 }
             }
-            
-
-            //_quadTree.GetObjectsIntersectingShape()
         }
 
         public async Task<IEnumerable<PointOfInterestFrontend>> GetPoints(float Longitude, float Latitude, bool ShowInRadius)
@@ -50,40 +47,19 @@ namespace City_Easter_Eggs.Controllers
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
 
             var points = new List<PointOfInterest>();
-            //_quadTree.GetAllObjects(points);
             if (ShowInRadius)
             {
-                var ellipse = new Ellipse(Latitude, Longitude, 0.04496608029593653f, 0.04496608029593653f);
+                float radLat = 0.04496608029593653f;
+                float radLng = radLat / MathF.Cos((float)Latitude * MathF.PI / 180);
+
+                var ellipse = new Ellipse(Latitude, Longitude, radLat, radLng);
                 _quadTree.GetObjectsIntersectingShape(points, ellipse);
             }
-            else _quadTree.GetAllObjects(points);
+            else
+            {
+                _quadTree.GetAllObjects(points);
+            }
             return points.Select(p => new PointOfInterestFrontend(p, currentUser));
-        }
-
-        public async Task<PointDetailsDto> GetPointDetailsAsync(string markerId)
-        {
-            //var user = _httpContextAccessor.HttpContext?.User;
-            //var currentUser = await _userService.GetUserFromPrincipal(user);
-
-            //var point = await _context.POIs
-            //    .Include(p => p.LikedPoints)
-            //    .Include(p => p.FavoritedPoints)
-            //    .FirstOrDefaultAsync(p => p.PointId == markerId);
-
-            //if (point == null) return null;
-
-            //var isLiked = point.LikedPoints.Any(lp => lp.User.UserId == currentUser.UserId);
-            //var isFavorite = point.FavoritedPoints.Any(fp => fp.User.UserId == currentUser.UserId);
-
-            //return new PointDetailsDto
-            //{
-            //    Name = point.Name,
-            //    Description = point.Description,
-            //    Likes = point.Likes,
-            //    IsLiked = isLiked,
-            //    IsFavorite = isFavorite
-            //};
-            return null;
         }
 
         public async Task<IEnumerable<string>> GetLikedByUser()
