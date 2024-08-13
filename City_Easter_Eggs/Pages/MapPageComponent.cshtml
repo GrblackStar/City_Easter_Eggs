@@ -85,6 +85,17 @@
             cursor: pointer;
         }
 
+        .table-container th, .table-container td {
+            max-width: 150px; /* Default max width for all columns */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .table-container .description-column {
+            max-width: 300px; /* Specific max width for description column */
+        }
+
         @@keyframes fadein {
             from {
                 opacity: 0;
@@ -380,11 +391,21 @@
                 // Create a new row and cells for the point
                 var row = tableBody.insertRow();
                 var nameCell = row.insertCell(0);
-                var latitudeCell = row.insertCell(1);
-                var longitudeCell = row.insertCell(2);
+                var descriptionCell = row.insertCell(1);
+                var creatorCell = row.insertCell(2);
+                var likesCell = row.insertCell(3);
+
+                // CSS classes
+                nameCell.classList.add('name-column');
+                descriptionCell.classList.add('description-column');
+                creatorCell.classList.add('creator-column');
+                likesCell.classList.add('likes-column');
+
+                //debugger;
                 nameCell.textContent = point.name;
-                latitudeCell.textContent = point.latitude;
-                longitudeCell.textContent = point.longitude;
+                descriptionCell.textContent = point.description;
+                creatorCell.textContent = point.pointCreatorName;
+                likesCell.textContent = point.likes;
 
                 row.addEventListener('click', function () {
                     console.log(`Point Name: ${point.name}`);
@@ -608,6 +629,7 @@
                 if (map != null && lastPos != null) {
                     // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
                     map.panTo(lastPos);
+                    map.setZoom(80);
                 }
             });
 
@@ -899,8 +921,9 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
+                    <th>Description</th>
+                    <th>Creator</th>
+                    <th>Likes</th>
                 </tr>
             </thead>
             <tbody>

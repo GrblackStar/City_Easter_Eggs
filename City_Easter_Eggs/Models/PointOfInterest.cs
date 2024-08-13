@@ -29,6 +29,9 @@ namespace City_Easter_Eggs.Models
         [NotMapped]
         public string PointCreatorId { get => Creator?.UserId; }
 
+        [NotMapped]
+        public string PointCreatorName { get => Creator?.Name; }
+
         [JsonIgnore]
         public List<LikedPoints> LikedPoints { get; set; } = new List<LikedPoints>();
 
