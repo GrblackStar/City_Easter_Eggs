@@ -394,18 +394,21 @@
                 var descriptionCell = row.insertCell(1);
                 var creatorCell = row.insertCell(2);
                 var likesCell = row.insertCell(3);
+                var dateCell = row.insertCell(4);
 
                 // CSS classes
                 nameCell.classList.add('name-column');
                 descriptionCell.classList.add('description-column');
                 creatorCell.classList.add('creator-column');
                 likesCell.classList.add('likes-column');
+                dateCell.classList.add('date-column');
 
                 //debugger;
                 nameCell.textContent = point.name;
                 descriptionCell.textContent = point.description;
                 creatorCell.textContent = point.pointCreatorName;
                 likesCell.textContent = point.likes;
+                dateCell.textContent = convertTimestampToDate(point.timeStamp);
 
                 row.addEventListener('click', function () {
                     console.log(`Point Name: ${point.name}`);
@@ -568,6 +571,19 @@
                 currentCircle.setMap(null);
                 currentCircle = null;
             }
+        }
+
+        function convertTimestampToDate(timestamp) {
+            // Convert seconds to milliseconds and format the tade
+            const date = new Date(timestamp * 1000);
+            // 5/26/2024 5:03:09 PM format
+            //return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            };
+            return date.toLocaleString('en-US', options).replace(',', '');
         }
 
         function showLocation(position) {
@@ -924,6 +940,7 @@
                     <th>Description</th>
                     <th>Creator</th>
                     <th>Likes</th>
+                    <th>Created On</th>
                 </tr>
             </thead>
             <tbody>
