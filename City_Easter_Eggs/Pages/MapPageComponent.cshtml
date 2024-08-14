@@ -15,6 +15,7 @@
             padding: 0px
         }
 
+        /* OPTIONS SECTION STYLING */
         .info-icon {
             position: relative;
             display: inline-block;
@@ -45,13 +46,34 @@
             opacity: 1;
         }
 
+        #optionsSection div {
+            margin-bottom: 10px;
+        }
+
+        #optionsSection h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .large-checkbox {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
         /* TABLE STYLING */
         .table-container {
             width: 100%;
             max-height: 700px;
             overflow-y: auto;
-            margin-top: 80px;
+            margin-top: 50px;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
         }
 
         #pointsTable {
@@ -161,9 +183,14 @@
         let lastPos = null;
 
         var pointsFromBackend = [];
-        var showInRadius = false;
+        
         let currentOutsideCircle = null;
         let currentInnerCircle = null;
+
+        var showInRadius = false;
+        var showLikedOnly = false;
+        var showSavedOnly = false;
+        var showCreatedByMeOnly = false;
 
         let sortState = {
             name: 'none',
@@ -344,9 +371,8 @@
                                                             height: 25px;
                                                         }
                                                         #directionsButton {
-                                                            font-size: 14px; 
-                                                            height: 35px;
-                                                            margin-top: 5px;
+                                                            font-size: 16px; 
+                                                            margin-top: 10px;
                                                             width: 100%;
                                                             outline: none;
                                                             border: none;
@@ -499,7 +525,7 @@
 
                 row.addEventListener('click', function () {
                     if (map != null && point.latitude != null && point.longitude != null) {
-                        var markerClicked = newMarkers[point.pointId];
+                        var markerClicked = oldMarkers[point.pointId];
                         markerClicked.content.classList.add("bounce");
                         setTimeout(() => {
                             markerClicked.content.classList.remove("bounce");
@@ -1051,6 +1077,11 @@
             drawPoints();
         }
 
+        window.updateOnOpionsChange = function(liked, saved, created) {
+            //drawPoints();
+            console.log(liked, saved, created);
+        }
+
         await initMap();
         await updateLocation();
         showInnerCircle(5000, lastPos);
@@ -1059,32 +1090,69 @@
 </head>
 <body>
     <div style="height: 700px" id="map"></div>
-    <div>
-        <input type="checkbox" id="toggleShowInRadius" onclick="toggleShowInRadius()"> Show points in 5 km radius
-        <span class="info-icon">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="8" cy="8" r="7.5" stroke="black"/>
-                <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
-            </svg>
-            <span class="tooltip-text">This option will display points within a 5 km radius from the center of the map.</span>
-        </span>
+    <div id="optionsSection" style="margin-top: 50px;">
+        <h3>Options</h3>
+        <div>
+            <input type="checkbox" id="toggleShowInRadius" onclick="toggleShowInRadius()" class="large-checkbox"> Show points in 5 km radius
+            <span class="info-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
+                    <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
+                </svg>
+                <span class="tooltip-text">This option will display points within a 5 km radius from the center of the map.</span>
+            </span>
+        </div>
+        <div>
+            <input type="checkbox" id="toggleShowLikedByMe" onclick="toggleOptions()" class="large-checkbox"> Show liked by me
+            <span class="info-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
+                    <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
+                </svg>
+                <span class="tooltip-text">This option will display points that you have liked.</span>
+            </span>
+        </div>
+        <div>
+            <input type="checkbox" id="toggleShowSaved" onclick="toggleOptions()" class="large-checkbox"> Show saved
+            <span class="info-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
+                    <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
+                </svg>
+                <span class="tooltip-text">This option will display points that you have saved.</span>
+            </span>
+        </div>
+        <div>
+            <input type="checkbox" id="toggleShowCreatedByMe" onclick="toggleOptions()" class="large-checkbox"> Show created by me
+            <span class="info-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
+                    <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
+                </svg>
+                <span class="tooltip-text">This option will display points that you have created.</span>
+            </span>
+        </div>
     </div>
+
+
     <div class="table-container">
-        <table id="pointsTable">
-            <thead>
-                <tr>
-                    <th data-column="name">Name <span class="sort-indicator"></span></th>
-                    <th data-column="description">Description <span class="sort-indicator"></span></th>
-                    <th data-column="likes">Likes <span class="sort-indicator"></span></th>
-                    <th data-column="distance">Distance (km) <span class="sort-indicator"></span></th>
-                    <th data-column="createdOn">Created On <span class="sort-indicator"></span></th>
-                    <th data-column="creator">Creator <span class="sort-indicator"></span></th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows are added dynamically -->
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table id="pointsTable">
+                <thead>
+                    <tr>
+                        <th data-column="name">Name <span class="sort-indicator"></span></th>
+                        <th data-column="description">Description <span class="sort-indicator"></span></th>
+                        <th data-column="likes">Likes <span class="sort-indicator"></span></th>
+                        <th data-column="distance">Distance (km) <span class="sort-indicator"></span></th>
+                        <th data-column="createdOn">Created On <span class="sort-indicator"></span></th>
+                        <th data-column="creator">Creator <span class="sort-indicator"></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows are added dynamically -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
 
@@ -1102,6 +1170,14 @@
 
         function toggleShowInRadius() {
             window.updateOnRadiusChange(document.getElementById('toggleShowInRadius').checked);
+        }
+
+        function toggleOptions() {
+            window.updateOnOpionsChange(
+                document.getElementById('toggleShowLikedByMe').checked,
+                document.getElementById('toggleShowSaved').checked,
+                document.getElementById('toggleShowCreatedByMe').checked,
+                );
         }
         
         // tooltip position strategy
