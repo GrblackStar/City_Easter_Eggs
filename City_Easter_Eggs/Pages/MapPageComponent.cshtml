@@ -302,6 +302,10 @@
                     }
                 };
 
+                let directionsButtonListener = function () {
+                    openGoogleMaps(thisPoint.latitude, thisPoint.longitude);
+                };
+
                 if (isInfoWindowOpen(panelCreatePoint))
                     panelCreatePoint.close();
 
@@ -339,6 +343,20 @@
                                                             width: 25px;
                                                             height: 25px;
                                                         }
+                                                        #directionsButton {
+                                                            font-size: 14px; 
+                                                            height: 35px;
+                                                            margin-top: 5px;
+                                                            width: 100%;
+                                                            outline: none;
+                                                            border: none;
+                                                            box-shadow: none;
+                                                        }
+                                                        #directionsButton:focus {
+                                                            outline: none; 
+                                                            border: none;
+                                                            box-shadow: none;
+                                                        }
                                                         .animate {
                                                             transition: transform 0.3s;
                                                             transform: scale(1.2);
@@ -363,6 +381,7 @@
                                                             </div>
                                                             <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'BookMarkedIcon.png' : 'BookMarkIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                                                         </div>
+                                                        <button id="directionsButton" type="submit" class="btn btn-lg btn-primary"> Take me there </button>
                                                     </div>
                                                 `);
                 panelPointInfo.open(marker.map, marker);
@@ -372,8 +391,10 @@
                 google.maps.event.addListener(panelPointInfo, 'domready', function () {
                     var likeButton = document.getElementById('likeButton');
                     var favoriteButton = document.getElementById('favoriteButton');
+                    var directionsButton = document.getElementById('directionsButton');
                     if (likeButton != null) likeButton.addEventListener('click', likeButtonListener);
                     if (favoriteButton != null) favoriteButton.addEventListener('click', favoriteButtonListener);
+                    if (directionsButton != null) directionsButton.addEventListener('click', directionsButtonListener);
                 });
             });
             return marker;
@@ -705,6 +726,10 @@
             const controlButton = document.createElement("button");
             controlButton.className = "btn btn-lg btn-primary";
             controlButton.textContent = "Back to my location";
+            // remove border and focus outline
+            controlButton.style.outline = "none";
+            controlButton.style.border = "none";
+            controlButton.style.boxShadow = "none";
             controlButton.addEventListener("click", async function () {
                 if (map != null && lastPos != null) {
                     // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
@@ -1010,6 +1035,13 @@
             // this gets the points more frequently -> 5 minutes
             await drawPoints();
             setTimeout(updatePoints, 300000);
+        }
+
+        function openGoogleMaps(lat, lng) {
+            const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            // opens a new tab: window.open(googleMapsUrl, '_blank');
+            // directly navigates from the current tab
+            window.location.href = googleMapsUrl;
         }
 
         window.updateOnRadiusChange = function(val) {
