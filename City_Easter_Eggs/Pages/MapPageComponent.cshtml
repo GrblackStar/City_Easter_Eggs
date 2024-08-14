@@ -106,17 +106,17 @@
             display: inline-block;
             margin-left: 5px;
             border: 4px solid transparent;
-            border-top-color: black;
+            border-top-color: white;
             vertical-align: middle;
         }
 
         th.asc .sort-indicator::after {
             border-top-color: transparent;
-            border-bottom-color: black;
+            border-bottom-color: white;
         }
 
         th.desc .sort-indicator::after {
-            border-top-color: black;
+            border-top-color: white;
         }
 
         @@keyframes fadein {
@@ -174,7 +174,6 @@
         };
 
         window.onload = () => {
-            console.log("Window onload event fired");
             const table = document.querySelector('#pointsTable');
             if (!table) {
                 console.error("Table not found");
@@ -187,12 +186,10 @@
             } else {
                 headers.forEach(header => {
                     const column = header.getAttribute('data-column');
-                    console.log(`Adding click event listener to header: ${column}`);
                     header.addEventListener('click', () => toggleSort(column));
                 });
             }
         };
-        
 
         function AddPointToMap(pointIndex) {
             var pointData = pointsFromBackend[pointIndex];
@@ -254,7 +251,7 @@
                                     this.classList.add('animate');
                                     setTimeout(() => {
                                         let likeButtonImage = document.querySelector('#likeButton img');
-                                        likeButtonImage.src = isLikedByUser ? 'LikeIcon.png' : 'LikedIcon.png';
+                                        likeButtonImage.src = isLikedByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
                                         isLikedByUser = !isLikedByUser;
                                     }, 100);
                                     setTimeout(() => {
@@ -292,7 +289,7 @@
                                 // Change the image after the button has finished growing, than resize it
                                 setTimeout(() => {
                                     let heartButtonImage = document.querySelector('#favoriteButton img');
-                                    heartButtonImage.src = isFavoriteByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
+                                    heartButtonImage.src = isFavoriteByUser ? 'BookMarkIcon.png' : 'BookMarkedIcon.png';
                                     isFavoriteByUser = !isFavoriteByUser;
                                 }, 100);
                                 setTimeout(() => {
@@ -361,10 +358,10 @@
                                                         ` : ''}
                                                         <div id="buttonSection">
                                                             <div id="likeSection">
-                                                                <button id="likeButton" style="margin-left: 5px"><img src="${likedByUser ? 'LikedIcon.png' : 'LikeIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
+                                                                <button id="likeButton" style="margin-left: 5px"><img src="${likedByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
                                                                 <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
                                                             </div>
-                                                            <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
+                                                            <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'BookMarkedIcon.png' : 'BookMarkIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                                                         </div>
                                                     </div>
                                                 `);
@@ -423,7 +420,6 @@
         }
 
         async function drawPoints() {
-            console.log("drawPoints function called");
             // var httpGetPoints = await HttpGet("/Points/GetPoints");
             var url = `/Points/GetPoints?Longitude=${lastPos.lng}&Latitude=${lastPos.lat}&ShowInRadius=${showInRadius}`;
             var httpGetPoints = await HttpGet(url);
@@ -459,9 +455,10 @@
                 var row = tableBody.insertRow();
                 var nameCell = row.insertCell(0);
                 var descriptionCell = row.insertCell(1);
-                var creatorCell = row.insertCell(2);
-                var likesCell = row.insertCell(3);
+                var likesCell = row.insertCell(2);
+                var distanceCell = row.insertCell(3);
                 var dateCell = row.insertCell(4);
+                var creatorCell = row.insertCell(5);
 
                 // CSS classes
                 nameCell.classList.add('name-column');
@@ -469,6 +466,7 @@
                 creatorCell.classList.add('creator-column');
                 likesCell.classList.add('likes-column');
                 dateCell.classList.add('date-column');
+                distanceCell.classList.add('distance-column');
 
                 //debugger;
                 nameCell.textContent = point.name;
@@ -476,9 +474,9 @@
                 creatorCell.textContent = point.pointCreatorName;
                 likesCell.textContent = point.likes;
                 dateCell.textContent = convertTimestampToDate(point.timeStamp);
+                distanceCell.textContent = getDistanceOfTwoPointsInKilometers(lastPos, { lat: point.latitude, lng: point.longitude }).toFixed(3);
 
                 row.addEventListener('click', function () {
-                    console.log(`Point Name: ${point.name}`);
                     if (map != null && point.latitude != null && point.longitude != null) {
                         var markerClicked = newMarkers[point.pointId];
                         markerClicked.content.classList.add("bounce");
@@ -799,7 +797,6 @@
                             body: json,
                         }).then(response => {
                             if (response.ok) {
-                                //console.log('Point created successfully');
                                 showToast('You have created a point.', 'success');
                                 panelCreatePoint.close();
                                 drawPoints();
@@ -857,7 +854,6 @@
                     // Open the info window at the clicked location
                     panelCreatePoint.setPosition(e.latLng);
                 } else {
-                    //console.log('You are too far away to create a point here.');
                     showToast('You are too far away to create a point here.', 'error');
                     if (isInfoWindowOpen(panelPointInfo) || isInfoWindowOpen(panelCreatePoint)) {
                         if (isInfoWindowOpen(panelPointInfo))
@@ -946,7 +942,6 @@
                 if (!toastContainer.firstChild) {
                     toastContainer.remove();
                 }
-                console.log('Toast dismissed');
             });
             toast.appendChild(dismissButton);
 
@@ -966,20 +961,16 @@
         }
 
         function toggleSort(column) {
-            console.log(`toggleSort function called for column: ${column}`);
             const states = ['none', 'asc', 'desc'];
             const currentState = sortState[column];
             const nextState = states[(states.indexOf(currentState) + 1) % states.length];
             sortState[column] = nextState;
             sortTable(column, nextState);
             updateHeaders();
-            console.log("Sorting column:", column, "Order:", nextState);
             
         }
 
         function sortTable(column, order) {
-            console.log(`sortTable function called for column: ${column}, order: ${order}`);
-            //debugger;
             pointsFromBackend.sort((a, b) => {
                 let valA, valB;
                 if (column === 'createdOn') {
@@ -998,13 +989,10 @@
                     return 0;
                 }
             });
-            console.log(pointsFromBackend);
-            //drawPoints();
             createTable();
         }
 
         function updateHeaders() {
-            console.log("updateHeaders function called");
             const headers = document.querySelectorAll('#pointsTable th');
             headers.forEach(header => {
                 const column = header.getAttribute('data-column');
@@ -1032,7 +1020,6 @@
         }
 
         await initMap();
-        //addColumnHeaderListeners();
         await updateLocation();
         showInnerCircle(5000, lastPos);
         await updatePoints();
@@ -1054,16 +1041,12 @@
         <table id="pointsTable">
             <thead>
                 <tr>
-                    <!-- <th>Name</th>
-                    <th>Description</th>
-                    <th>Creator</th>
-                    <th>Likes</th>
-                    <th>Created On</th> -->
                     <th data-column="name">Name <span class="sort-indicator"></span></th>
                     <th data-column="description">Description <span class="sort-indicator"></span></th>
-                    <th data-column="creator">Creator <span class="sort-indicator"></span></th>
                     <th data-column="likes">Likes <span class="sort-indicator"></span></th>
+                    <th data-column="distance">Distance (km) <span class="sort-indicator"></span></th>
                     <th data-column="createdOn">Created On <span class="sort-indicator"></span></th>
+                    <th data-column="creator">Creator <span class="sort-indicator"></span></th>
                 </tr>
             </thead>
             <tbody>
