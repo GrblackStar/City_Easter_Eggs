@@ -283,7 +283,13 @@
                             })
                                 .then(response => response.json())
                                 .then(data => {
-                                    pointsFromBackend[pointIndex] = data
+                                    //pointsFromBackend[pointIndex] = data
+                                    for (let i = 0; i < pointsFromBackend.length; i++) {
+                                        if (pointsFromBackend[i].point.pointId == pointId) {
+                                            pointsFromBackend[i] = data;
+                                            break;
+                                        }
+                                    }
 
                                     // Update the likes label and icon
                                     document.getElementById('likes').textContent = data.point.likes;
@@ -323,7 +329,13 @@
                         })
                             .then(response => response.json())
                             .then(data => {
-                                pointsFromBackend[pointIndex] = data
+                                //pointsFromBackend[pointIndex] = data
+                                for (let i = 0; i < pointsFromBackend.length; i++) {
+                                    if (pointsFromBackend[i].point.pointId == pointId) {
+                                        pointsFromBackend[i] = data;
+                                        break;
+                                    }
+                                }
                                 // Change the like button image with animation
                                 this.classList.add('animate');
                                 // Change the image after the button has finished growing, than resize it
