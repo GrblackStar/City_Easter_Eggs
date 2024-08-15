@@ -164,6 +164,7 @@
 
     <script type="module">
         const IsUserLoggedIn = "@User?.Identity!.IsAuthenticated" == 'True';
+        const CurrentUserId = "@User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
         window.IsUserLoggedIn = IsUserLoggedIn;
 
         // Request needed libraries.
@@ -473,13 +474,21 @@
             pointsFromBackend = JSON.parse(httpGetPoints);
 
             var newMarkers = [];
-
+            
             for (let i = 0; i < pointsFromBackend.length; i++) {
-                    const pointData = pointsFromBackend[i];
-                    const point = pointData.point;
+                const pointData = pointsFromBackend[i];
+                const point = pointData.point;
+
+                const isCreator = point.pointCreatorId === CurrentUserId;
+
+                if ((showLikedOnly && pointData.likedByCurrentUser) ||
+                        (showSavedOnly && pointData.favoriteByCurrentUser) ||
+                        (showCreatedByMeOnly && isCreator) ||
+                        (!showLikedOnly && !showSavedOnly && !showCreatedByMeOnly)) {
                     var marker = AddPointToMap(i);
                     newMarkers[i] = marker;
                     newMarkers[point.pointId] = marker;
+                }
             }
 
             createTable();
@@ -543,7 +552,10 @@
 
         function removeOldMarkers() {
             for (var i = 0; i < oldMarkers.length; i++) {
-                oldMarkers[i].setMap(null);
+                // after filtering, the oldMarkers array will have null values
+                if (oldMarkers[i]) {
+                    oldMarkers[i].setMap(null);
+                }
             }
             oldMarkers = [];
         }

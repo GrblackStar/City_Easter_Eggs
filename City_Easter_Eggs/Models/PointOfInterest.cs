@@ -55,5 +55,12 @@ namespace City_Easter_Eggs.Models
             Vector2 objectPos = GetPosition();
             return new Rectangle(objectPos, new Vector2(MathHelper.MetersToEarthRadiusRadian(1)));
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is PointOfInterest poi)
+                return poi.PointId == PointId;
+            return base.Equals(obj);
+        }
     }
 }

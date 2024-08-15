@@ -92,6 +92,7 @@ namespace City_Easter_Eggs.Controllers
             currentUser.LikedPoints.Add(like);
             point.Creator.LikesObtained++;
 
+            _quadTree.UpdateObject(point);
             await _context.SaveChangesAsync();
             return new PointOfInterestFrontend(point, currentUser);
         }
@@ -115,6 +116,7 @@ namespace City_Easter_Eggs.Controllers
             point.FavoritedPoints.Add(like);
             currentUser?.FavoritedPoints.Add(like);
 
+            _quadTree.UpdateObject(point);
             await _context.SaveChangesAsync();
             return new PointOfInterestFrontend(point, currentUser);
         }
@@ -140,6 +142,7 @@ namespace City_Easter_Eggs.Controllers
 
             _context.LikedPoints.Remove(like);
 
+            _quadTree.UpdateObject(point);
             await _context.SaveChangesAsync();
             return new PointOfInterestFrontend(point, currentUser);
         }
@@ -163,10 +166,10 @@ namespace City_Easter_Eggs.Controllers
 
             _context.FavouritePoints.Remove(like);
 
+            _quadTree.UpdateObject(point);
             await _context.SaveChangesAsync();
             return new PointOfInterestFrontend(point, currentUser);
         }
-
 
         public async Task CreatePointAsync(string name, string description, double longitude, double latitude)
         {

@@ -35,7 +35,7 @@ public class QuadTreeNode<T> where T : IQuadTreeObject
         return this;
     }
 
-    public QuadTreeNode<T> AddObject(T obj)
+    public virtual QuadTreeNode<T> AddObject(T obj)
     {
         Rectangle bounds = obj.GetBounds();
 
@@ -59,8 +59,16 @@ public class QuadTreeNode<T> where T : IQuadTreeObject
         return this;
     }
 
-    public void RemoveObject(T obj)
+    public virtual void RemoveObject(T obj)
     {
         Objects?.Remove(obj);
+        if (ChildNodes != null)
+        {
+            for (int i = 0; i < ChildNodes.Length; i++)
+            {
+                var childNode = ChildNodes[i];
+                childNode.RemoveObject(obj);
+            }
+        }
     }
 }
