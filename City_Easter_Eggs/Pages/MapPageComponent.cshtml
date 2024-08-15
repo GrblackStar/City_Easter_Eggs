@@ -114,7 +114,7 @@
             white-space: nowrap;
         }
 
-        .table-container .description-column {
+        .table-container .name-column {
             max-width: 300px; /* Specific max width for description column */
         }
 
@@ -219,9 +219,9 @@
             }
         };
 
-        function AddPointToMap(pointIndex) {
-            var pointData = pointsFromBackend[pointIndex];
+        function AddPointToMap(pointData) {
             var thisPoint = pointData.point;
+            var pointId = thisPoint.pointId;
             const position = { lat: thisPoint.latitude, lng: thisPoint.longitude };
             const name = thisPoint.name;
 
@@ -239,7 +239,18 @@
 
             // Add a click listener for each marker, and set up the info window.
             marker.addListener('click', ({ domEvent, latLng }) => {
-                var pointData = pointsFromBackend[pointIndex];
+                // Get latest data from array
+                var pointData = null;
+                for (let i = 0; i < pointsFromBackend.length; i++)
+                {
+                    var thisPoint = pointsFromBackend[i];
+                    if (thisPoint.point.pointId == pointId)
+                    {
+                        pointData = thisPoint
+                    }
+                }
+                if (pointData == null) return;
+
                 var thisPoint = pointData.point;
                 var likes = thisPoint.likes;
                 var description = thisPoint.description;
@@ -285,6 +296,7 @@
                                     setTimeout(() => {
                                         this.classList.remove('animate');
                                     }, 200);
+                                    createTable();
                                 })
                                 .catch((error) => {
                                     showToast('Error:' + error, 'error');
@@ -485,7 +497,7 @@
                         (showSavedOnly && pointData.favoriteByCurrentUser) ||
                         (showCreatedByMeOnly && isCreator) ||
                         (!showLikedOnly && !showSavedOnly && !showCreatedByMeOnly)) {
-                    var marker = AddPointToMap(i);
+                    var marker = AddPointToMap(pointData);
                     newMarkers[i] = marker;
                     newMarkers[point.pointId] = marker;
                 }
@@ -510,15 +522,13 @@
                 // Create a new row and cells for the point
                 var row = tableBody.insertRow();
                 var nameCell = row.insertCell(0);
-                var descriptionCell = row.insertCell(1);
-                var likesCell = row.insertCell(2);
-                var distanceCell = row.insertCell(3);
-                var dateCell = row.insertCell(4);
-                var creatorCell = row.insertCell(5);
+                var likesCell = row.insertCell(1);
+                var distanceCell = row.insertCell(2);
+                var dateCell = row.insertCell(3);
+                var creatorCell = row.insertCell(4);
 
                 // CSS classes
                 nameCell.classList.add('name-column');
-                descriptionCell.classList.add('description-column');
                 creatorCell.classList.add('creator-column');
                 likesCell.classList.add('likes-column');
                 dateCell.classList.add('date-column');
@@ -526,7 +536,6 @@
 
                 //debugger;
                 nameCell.textContent = point.name;
-                descriptionCell.textContent = point.description;
                 creatorCell.textContent = point.pointCreatorName;
                 likesCell.textContent = point.likes;
                 dateCell.textContent = convertTimestampToDate(point.timeStamp);
@@ -544,6 +553,7 @@
 
                         // center the map to the point and scroll up to the map
                         map.panTo({ lat: point.latitude, lng: point.longitude });
+                        map.setZoom(80);
                         scrollToMap();
                     }
                 });
@@ -731,6 +741,7 @@
             }
             else {
                 // If it does exist, update its position. Redraw the inner circle if the user has moved.
+                createTable();
                 userMarker.position = pos;
                 if (showInRadius) drawPoints();
                 removeCircle(currentInnerCircle);
@@ -1153,7 +1164,6 @@
                 <thead>
                     <tr>
                         <th data-column="name">Name <span class="sort-indicator"></span></th>
-                        <th data-column="description">Description <span class="sort-indicator"></span></th>
                         <th data-column="likes">Likes <span class="sort-indicator"></span></th>
                         <th data-column="distance">Distance (km) <span class="sort-indicator"></span></th>
                         <th data-column="createdOn">Created On <span class="sort-indicator"></span></th>
