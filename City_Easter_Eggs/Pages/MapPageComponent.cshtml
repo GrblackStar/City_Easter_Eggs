@@ -123,7 +123,22 @@
             position: relative;
         }
 
-        th .sort-indicator::after {
+        .sort-indicator::after {
+            content: ' \25B2\25BC'; /* Up and down arrows */
+            display: none;
+        }
+
+        th.asc .sort-indicator::after {
+            content: ' \25B2'; /* Up arrow */
+            display: inline;
+        }
+
+        th.desc .sort-indicator::after {
+            content: ' \25BC'; /* Down arrow */
+            display: inline;
+        }
+
+        /* th .sort-indicator::after {
             content: '';
             display: inline-block;
             margin-left: 5px;
@@ -139,7 +154,7 @@
 
         th.desc .sort-indicator::after {
             border-top-color: white;
-        }
+        } */
 
         @@keyframes fadein {
             from {
@@ -195,29 +210,13 @@
 
         let sortState = {
             name: 'none',
-            description: 'none',
+            likes: 'none', // Default sorted column
+            distance: 'asc',
+            createdOn: 'none',
             creator: 'none',
-            likes: 'none',
-            createdOn: 'none'
         };
 
-        window.onload = () => {
-            const table = document.querySelector('#pointsTable');
-            if (!table) {
-                console.error("Table not found");
-                return;
-            }
-
-            const headers = table.querySelectorAll('th');
-            if (headers.length === 0) {
-                console.error("No headers found in the table");
-            } else {
-                headers.forEach(header => {
-                    const column = header.getAttribute('data-column');
-                    header.addEventListener('click', () => toggleSort(column));
-                });
-            }
-        };
+        let currentSortedColumn = 'distance'; 
 
         function AddPointToMap(pointData) {
             var thisPoint = pointData.point;
@@ -530,6 +529,14 @@
             for (let i = 0; i < pointsFromBackend.length; i++) {
                 const pointData = pointsFromBackend[i];
                 let point = pointData.point;
+                point.distance = getDistanceOfTwoPointsInKilometers(lastPos, { lat: point.latitude, lng: point.longitude });
+            }
+
+            sortTable(currentSortedColumn, sortState[currentSortedColumn]);
+
+            for (let i = 0; i < pointsFromBackend.length; i++) {
+                const pointData = pointsFromBackend[i];
+                let point = pointData.point;
 
                 const isCreator = point.pointCreatorId === CurrentUserId;
 
@@ -559,7 +566,6 @@
                     likesCell.textContent = point.likes;
                     dateCell.textContent = convertTimestampToDate(point.timeStamp);
 
-                    point.distance = getDistanceOfTwoPointsInKilometers(lastPos, { lat: point.latitude, lng: point.longitude });
                     distanceCell.textContent = point.distance.toFixed(3);
 
                     row.addEventListener('click', function () {
@@ -578,6 +584,7 @@
                     });
                 }
             }
+            updateHeaders();
         }
 
         function removeOldMarkers() {
@@ -1056,14 +1063,19 @@
             }, 2950);
         }
 
-        function toggleSort(column) {
-            const states = ['none', 'asc', 'desc'];
+        window.toggleSort = function(column) {
             const currentState = sortState[column];
-            const nextState = states[(states.indexOf(currentState) + 1) % states.length];
+            const nextState = currentState === 'asc' ? 'desc' : 'asc';
+
+            // Unsort previous column
+            if (currentSortedColumn && currentSortedColumn !== column) {
+                sortState[currentSortedColumn] = 'none';
+            }
+
             sortState[column] = nextState;
-            sortTable(column, nextState);
-            updateHeaders();
-            
+            currentSortedColumn = column;
+
+            createTable();
         }
 
         function sortTable(column, order) {
@@ -1072,9 +1084,12 @@
                 if (column === 'createdOn') {
                     valA = new Date(a.point.timeStamp * 1000);
                     valB = new Date(b.point.timeStamp * 1000);
-                } else {
+                } else if (typeof a.point[column] === 'number') {
                     valA = a.point[column];
                     valB = b.point[column];
+                } else {
+                    valA = String(a.point[column]).toLowerCase();
+                    valB = String(b.point[column]).toLowerCase();
                 }
 
                 if (order === 'asc') {
@@ -1085,7 +1100,6 @@
                     return 0;
                 }
             });
-            createTable();
         }
 
         function updateHeaders() {
@@ -1183,11 +1197,11 @@
             <table id="pointsTable">
                 <thead>
                     <tr>
-                        <th data-column="name">Name <span class="sort-indicator"></span></th>
-                        <th data-column="likes">Likes <span class="sort-indicator"></span></th>
-                        <th data-column="distance">Distance (km) <span class="sort-indicator"></span></th>
-                        <th data-column="createdOn">Created On <span class="sort-indicator"></span></th>
-                        <th data-column="creator">Creator <span class="sort-indicator"></span></th>
+                        <th data-column="name" onclick="toggleSort('name')">Name <span class="sort-indicator"></span></th>
+                        <th data-column="likes" onclick="toggleSort('likes')">Likes <span class="sort-indicator"></span></th>
+                        <th data-column="distance" onclick="toggleSort('distance')">Distance (km) <span class="sort-indicator"></span></th>
+                        <th data-column="createdOn" onclick="toggleSort('createdOn')">Created On <span class="sort-indicator"></span></th>
+                        <th data-column="creator" onclick="toggleSort('creator')">Creator <span class="sort-indicator"></span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1217,6 +1231,10 @@
                 document.getElementById('toggleShowSaved').checked,
                 document.getElementById('toggleShowCreatedByMe').checked,
                 );
+        }
+
+        function toggleSort(column) {
+            window.toggleSort(column);
         }
         
         // tooltip position strategy
