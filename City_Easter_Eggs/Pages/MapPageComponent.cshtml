@@ -496,7 +496,7 @@
 
             for (let i = 0; i < pointsFromBackend.length; i++) {
                 const pointData = pointsFromBackend[i];
-                const point = pointData.point;
+                let point = pointData.point;
 
                 // Create a new row and cells for the point
                 var row = tableBody.insertRow();
@@ -521,7 +521,9 @@
                 creatorCell.textContent = point.pointCreatorName;
                 likesCell.textContent = point.likes;
                 dateCell.textContent = convertTimestampToDate(point.timeStamp);
-                distanceCell.textContent = getDistanceOfTwoPointsInKilometers(lastPos, { lat: point.latitude, lng: point.longitude }).toFixed(3);
+
+                point.distance = getDistanceOfTwoPointsInKilometers(lastPos, { lat: point.latitude, lng: point.longitude });
+                distanceCell.textContent = point.distance.toFixed(3);
 
                 row.addEventListener('click', function () {
                     if (map != null && point.latitude != null && point.longitude != null) {
@@ -1070,16 +1072,14 @@
             window.location.href = googleMapsUrl;
         }
 
-        window.updateOnRadiusChange = function(val) {
-            showInRadius = val;
-            // get points in radius
+        window.updateOnOpionsChange = function(radius, liked, saved, created) {
+            showInRadius = radius;
+            showLikedOnly = liked;
+            showSavedOnly = saved;
+            showCreatedByMeOnly = created;
+
             showOutsideCircle(5000, lastPos);
             drawPoints();
-        }
-
-        window.updateOnOpionsChange = function(liked, saved, created) {
-            //drawPoints();
-            console.log(liked, saved, created);
         }
 
         await initMap();
@@ -1090,10 +1090,11 @@
 </head>
 <body>
     <div style="height: 700px" id="map"></div>
+    
     <div id="optionsSection" style="margin-top: 50px;">
         <h3>Options</h3>
         <div>
-            <input type="checkbox" id="toggleShowInRadius" onclick="toggleShowInRadius()" class="large-checkbox"> Show points in 5 km radius
+            <input type="checkbox" id="toggleShowInRadius" onclick="toggleOptions()" class="large-checkbox"> Show points in 5 km radius
             <span class="info-icon">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="8" cy="8" r="7.5" stroke="black"/>
@@ -1134,7 +1135,6 @@
         </div>
     </div>
 
-
     <div class="table-container">
         <div class="table-responsive">
             <table id="pointsTable">
@@ -1168,12 +1168,9 @@
             return (map !== null && typeof map !== "undefined");
         }
 
-        function toggleShowInRadius() {
-            window.updateOnRadiusChange(document.getElementById('toggleShowInRadius').checked);
-        }
-
         function toggleOptions() {
             window.updateOnOpionsChange(
+                document.getElementById('toggleShowInRadius').checked,
                 document.getElementById('toggleShowLikedByMe').checked,
                 document.getElementById('toggleShowSaved').checked,
                 document.getElementById('toggleShowCreatedByMe').checked,
