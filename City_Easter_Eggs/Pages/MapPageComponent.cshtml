@@ -531,44 +531,52 @@
                 const pointData = pointsFromBackend[i];
                 let point = pointData.point;
 
-                // Create a new row and cells for the point
-                var row = tableBody.insertRow();
-                var nameCell = row.insertCell(0);
-                var likesCell = row.insertCell(1);
-                var distanceCell = row.insertCell(2);
-                var dateCell = row.insertCell(3);
-                var creatorCell = row.insertCell(4);
+                const isCreator = point.pointCreatorId === CurrentUserId;
 
-                // CSS classes
-                nameCell.classList.add('name-column');
-                creatorCell.classList.add('creator-column');
-                likesCell.classList.add('likes-column');
-                dateCell.classList.add('date-column');
-                distanceCell.classList.add('distance-column');
+                if ((showLikedOnly && pointData.likedByCurrentUser) ||
+                    (showSavedOnly && pointData.favoriteByCurrentUser) ||
+                    (showCreatedByMeOnly && isCreator) ||
+                    (!showLikedOnly && !showSavedOnly && !showCreatedByMeOnly)) {
 
-                //debugger;
-                nameCell.textContent = point.name;
-                creatorCell.textContent = point.pointCreatorName;
-                likesCell.textContent = point.likes;
-                dateCell.textContent = convertTimestampToDate(point.timeStamp);
+                    // Create a new row and cells for the point
+                    var row = tableBody.insertRow();
+                    var nameCell = row.insertCell(0);
+                    var likesCell = row.insertCell(1);
+                    var distanceCell = row.insertCell(2);
+                    var dateCell = row.insertCell(3);
+                    var creatorCell = row.insertCell(4);
 
-                point.distance = getDistanceOfTwoPointsInKilometers(lastPos, { lat: point.latitude, lng: point.longitude });
-                distanceCell.textContent = point.distance.toFixed(3);
+                    // CSS classes
+                    nameCell.classList.add('name-column');
+                    creatorCell.classList.add('creator-column');
+                    likesCell.classList.add('likes-column');
+                    dateCell.classList.add('date-column');
+                    distanceCell.classList.add('distance-column');
 
-                row.addEventListener('click', function () {
-                    if (map != null && point.latitude != null && point.longitude != null) {
-                        var markerClicked = oldMarkers[point.pointId];
-                        markerClicked.content.classList.add("bounce");
-                        setTimeout(() => {
-                            markerClicked.content.classList.remove("bounce");
-                        }, 2000);
+                    //debugger;
+                    nameCell.textContent = point.name;
+                    creatorCell.textContent = point.pointCreatorName;
+                    likesCell.textContent = point.likes;
+                    dateCell.textContent = convertTimestampToDate(point.timeStamp);
 
-                        // center the map to the point and scroll up to the map
-                        map.panTo({ lat: point.latitude, lng: point.longitude });
-                        map.setZoom(80);
-                        scrollToMap();
-                    }
-                });
+                    point.distance = getDistanceOfTwoPointsInKilometers(lastPos, { lat: point.latitude, lng: point.longitude });
+                    distanceCell.textContent = point.distance.toFixed(3);
+
+                    row.addEventListener('click', function () {
+                        if (map != null && point.latitude != null && point.longitude != null) {
+                            var markerClicked = oldMarkers[point.pointId];
+                            markerClicked.content.classList.add("bounce");
+                            setTimeout(() => {
+                                markerClicked.content.classList.remove("bounce");
+                            }, 2000);
+
+                            // center the map to the point and scroll up to the map
+                            map.panTo({ lat: point.latitude, lng: point.longitude });
+                            map.setZoom(80);
+                            scrollToMap();
+                        }
+                    });
+                }
             }
         }
 
