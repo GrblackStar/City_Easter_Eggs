@@ -202,6 +202,7 @@
         
         let currentOutsideCircle = null;
         let currentInnerCircle = null;
+        let currentSmallCIrcle = null;
 
         var showInRadius = false;
         var showLikedOnly = false;
@@ -225,13 +226,16 @@
             const name = thisPoint.name;
 
             const normalEggImage = document.createElement("img");
-            normalEggImage.src = "/NormalEgg.png";
+
+            if (pointData.point.pointCreatorName === "System") normalEggImage.src = "/BlueEgg.png";
+            else if (pointData.point.pointCreatorId === CurrentUserId) normalEggImage.src = "/YellowEgg.png";
+            else if (pointData.likedByCurrentUser) normalEggImage.src = "/RedEgg.png"
+            else if (pointData.favoriteByCurrentUser) normalEggImage.src = "/GreenEgg.png"
+            else if (pointData.isTopPercentile) normalEggImage.src = "/PurpleEgg.png";
+            else normalEggImage.src = "/NormalEgg.png";
+
             normalEggImage.width = 28;
             normalEggImage.height = 28;
-
-            if (pointData.isTopPercentile) {
-
-            }
 
             const marker = new AdvancedMarkerElement({
                 map: map,
@@ -260,7 +264,6 @@
                 var markerId = thisPoint.pointId;
                 var likedByUser = pointData.likedByCurrentUser;
                 var favoriteByUser = pointData.favoriteByCurrentUser;
-                console.dir(pointData)
 
                 const { target } = domEvent;
 
@@ -663,6 +666,21 @@
             });
         }
 
+        function showSmallCircle(radius, position) {
+            currentSmallCIrcle = new google.maps.Circle({
+                strokeColor: "#fcd303",
+                strokeOpacity: 0.85,
+                strokeWeight: 3,
+                fillColor: "#000000",
+                fillOpacity: 0,
+                map: map,
+                center: position,
+                radius: radius,
+                clickable: false,
+                zIndex: 100
+            });
+        }
+
         function drawCircle(point, radius, dir) {
             var d2r = Math.PI / 180; // degrees to radians 
             var r2d = 180 / Math.PI; // radians to degrees 
@@ -777,7 +795,9 @@
                 if (showInRadius) drawPoints();
                 removeCircle(currentInnerCircle);
                 removeCircle(currentOutsideCircle);
+                removeCircle(currentSmallCIrcle);
                 showInnerCircle(5000, pos);
+                showSmallCircle(50, pos);
                 showOutsideCircle(5000, pos);
                 showToast('Your current location changed', 'success');
                 // if showInRadius is true, redraw the points
@@ -1145,6 +1165,7 @@
 
         await initMap();
         await updateLocation();
+        showSmallCircle(50, lastPos);
         showInnerCircle(5000, lastPos);
         await updatePoints();
     </script>
