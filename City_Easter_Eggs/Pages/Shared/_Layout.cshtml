@@ -13,7 +13,7 @@
 </head>
 <body>
 <header>
-	<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+	<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow navbar-custom mb-3">
 		<div class="container">
 			<a class="navbar-brand" asp-area="" asp-page="/Index">City Easter Eggs</a>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -25,10 +25,10 @@
 						@if (UserManager.IsSignedIn(User))
 						{
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+								<a class="nav-link text-light" asp-area="" asp-page="/Index">Home</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-page="/About">About</a>
+								<a class="nav-link text-light" asp-area="" asp-page="/About">About</a>
 							</li>
 						}
 						</ul>

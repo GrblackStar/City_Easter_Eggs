@@ -93,7 +93,7 @@ namespace City_Easter_Eggs.Controllers
             User? currentUser = await _userService.GetUserFromPrincipal(user);
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
 
-            PointOfInterest? point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
+            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
 
             if (point == null) return null;
 
@@ -145,7 +145,7 @@ namespace City_Easter_Eggs.Controllers
             User? currentUser = await _userService.GetUserFromPrincipal(user);
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
 
-            PointOfInterest? point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
+            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
 
             if (point == null) return null;
 

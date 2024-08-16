@@ -6,21 +6,21 @@
 	@if (UserManager.IsSignedIn(User))
 	{
 		<li class="nav-item">
-			<a class="nav-link text-dark" title="Manage">Hello @User.Identity?.Name!</a>
+			<a class="nav-link text-light" title="Manage">Hello @User.Identity?.Name!</a>
 		</li>
 		<li class="nav-item">
 			<form class="form-inline" asp-page="/Identity/Logout" asp-route-returnUrl="@Url.Page("/Index")">
-				<button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+				<button type="submit" class="nav-link btn btn-link text-light">Logout</button>
 			</form>
 		</li>
 	}
 	else
 	{
 		<li class="nav-item">
-			<a class="nav-link text-dark" asp-page="/Identity/Register">Register</a>
+			<a class="nav-link text-light" asp-page="/Identity/Register">Register</a>
 		</li>
 		<li class="nav-item">
-			<a class="nav-link text-dark" asp-page="/Identity/Login">Login</a>
+			<a class="nav-link text-light" asp-page="/Identity/Login">Login</a>
 		</li>
 	}
 </ul>

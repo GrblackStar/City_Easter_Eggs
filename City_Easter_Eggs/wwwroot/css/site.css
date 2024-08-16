@@ -21,6 +21,11 @@ body {
   margin-bottom: 60px;
 }
 
+.navbar-custom {
+    background-color: rgba(40, 58, 77, 0.8);
+    color: white;
+}
+
 button.gm-ui-hover-effect {
     position: absolute !important;
     top: 0;

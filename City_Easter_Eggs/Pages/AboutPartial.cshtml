@@ -11,7 +11,22 @@
             margin: 0px;
             padding: 0px;
         }
-        h1, h2, h3, h4 {
+        body {
+            background: radial-gradient(circle at 20% 20%, rgba(0, 0, 255, 0.1), transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 165, 0, 0.1), transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 0, 0.1), transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(0, 128, 0, 0.1), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 0, 255, 0.1), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(75, 0, 130, 0.1), transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(238, 130, 238, 0.1), transparent 50%);
+            background-size: cover;
+            background-blend-mode: screen;
+            background-attachment: fixed;
+            background-color: transparent;
+        }
+        .container {
+            padding: 0 50px;
+        }
+        h1, h2, h3, h4, h5 {
             color: #333;
             margin-top: 30px;
         }
@@ -25,10 +40,10 @@
         }
         .color-legend {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
         }
         .color-legend div {
-            margin-right: 20px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
         }
@@ -36,51 +51,50 @@
             width: 20px;
             height: 20px;
             margin-right: 5px;
+            background-size: cover;
+            vertical-align: middle;
         }
-        .red { background-color: red; }
-        .green { background-color: green; }
-        .blue { background-color: blue; }
-        .yellow { background-color: yellow; }
-        .purple { background-color: purple; }
+        .red { background-image: url('/RedEgg.png'); }
+        .green { background-image: url('/GreenEgg.png'); }
+        .blue { background-image: url('/BlueEgg.png'); }
+        .yellow { background-image: url('/YellowEgg.png'); }
+        .purple { background-image: url('/PurpleEgg.png'); }
+        .location { background-image: url('/EasterEgg.png'); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>About City Easter Eggs</h2>
+        <h3>About City Easter Eggs</h3>
         <p>City Easter Eggs is an innovative web application designed to connect people with the hidden gems of their city. Drawing inspiration from the concept of geocaching, City Easter Eggs offers a platform where users can share and discover unique and interesting locations around them. Whether it's a stunning piece of street art tucked away in a quiet alley, a cozy café, a peaceful park, or any other noteworthy spot, this platform encourages users to highlight these gems for others to enjoy.</p>
         <p>In a world where technology often keeps us indoors, this project aims to foster a sense of adventure and curiosity, encouraging users to step outside, reconnect with their surroundings in a meaningful way, and uncover the secrets that make their city special.</p>
         <p>City Easter Eggs is about creating a wholesome and enjoyable experience that encourages people to see beauty in the everyday, to share that beauty with others, and to strengthen the bond between individuals and their communities. It’s a project that transforms simple walks into adventures, ordinary places into destinations, and casual outings into opportunities for discovery and connection.</p>
 
-        <h2>How to Use the Platform</h2>
-        <h3>Login and Register</h3>
+        <h3>How to Use the Platform</h3>
+        <h4>Login and Register</h4>
         <p>To get started with City Easter Eggs, you need to create an account. You can register by providing basic information - username and password. You will also need to confirm you are indeed a human. 👀</p>
         <p>Once registered, you can log in to access all the features of the platform.</p>
         
-        <h3>Home Page</h3>
-        <p>When logged in you'll see a map. Here you see all the interesting locations people want to share.</p>
-        <h4>Different Colors Have Different Meanings</h4>
+        <h4>Home Page</h4>
+        <p>After logging in, you'll see an interactive map filled with various markers representing interesting locations shared by other users.</p>
+
+        <h5>Different Colors Have Different Meanings</h5>
         <div class="color-legend">
-            <div><div class="color-box red"></div>This is you... your location</div>
-            <div><div class="color-box red"></div>Red - Those are the places you've liked'</div>
-            <div><div class="color-box green"></div>Green - Those are the places you've saved</div>
-            <div><div class="color-box blue"></div>Blue - Those are the Metrostations</div>
-            <div><div class="color-box yellow"></div>Yellow - Those are the places you've added'</div>
-            <div><div class="color-box purple"></div>Purple -  Those are the most liked places</div>
+            <div><div class="color-box location"></div>Your Location</div>
+            <div><div class="color-box red"></div>Red - Locations you've liked</div>
+            <div><div class="color-box green"></div>Green - Locations you've saved</div>
+            <div><div class="color-box blue"></div>Blue - Metro stations</div>
+            <div><div class="color-box yellow"></div>Yellow - Locations you've added</div>
+            <div><div class="color-box purple"></div>Purple - Most liked locations</div>
         </div>
 
-        <h4>What can you do on the map</h4>
-        <p>🔍 Those eggs that people place, you can see more about them by clicking on them. It opens a little panel with detais. You can save the point for later or you can like it, if you're close enough. You can also click on the "Take me there" button to see what can take you there.'</p>
+        <h5>Interacting with the Map</h5>
+        <p>🔍 Explore the map by clicking on the markers (or "eggs") to learn more about a location. A details panel will pop up, where you can save the spot for later or like it if you're nearby. You can also click the "Take me there" button to explore navigation options.</p>
+        <p>📍 Want to share a location? Simply click on the map near you. A panel will appear where you can enter details about the place. After filling in the information, click "Create," and your marker will be visible for everyone to discover.</p>
+        <p>🧭 If you ever lose track of where you are on the map, simply click the "Back to my location" button to center the map on your current position.</p>
+        <p>📏 You'll notice two circles around your location on the map. The smaller yellow circle (50m radius) indicates where you can create and like markers. The larger purple circle (5km radius) represents the range for the 5km filter, which can be toggled in the options.</p>
 
-        <p>📍 You not only can see the place people want to share, but you can also add places yourself. You can click on the map somewhere near you and that will open a panel for you to enter some details. Than you just click on "Create" and that's it, you've created a marker for everyone to see. 🥚</p>
-
-        <p>🧭 If you get lost, you can quickly return the map to ypur location with the button "Back to my location" on the map.</p>
-
-        <p>🧭 On the map, you also see two circles and you are at the center of them. The smaller yellow one is 50m and shows you where you can create and like points. The bigger purple one is 5km and shows you the range of the 5km filter, which can be enabled from the options</p>
-
-
-
-        <h4>Options</h4>
-        <p>This section allows you to filter the map and table (bellow). CHoosing from the filters will hide the points that are not valid for the criteria:</p>
+        <h5>Options</h5>
+        <p>The options menu allows you to refine the markers displayed on the map and in the table below. Apply filters to customize your view:</p>
         <ul>
             <li>Show only points in 5 km radius</li>
             <li>Show only liked by me</li>
@@ -88,12 +102,9 @@
             <li>Show only created by me</li>
         </ul>
 
-
-
-        <h4>Table - Collection of Locations</h4>
-        <p>The table provides a detailed view of all the markers. The selected filters from options take affect on the content that will be shown here. If you click on a place from the table, it will show you that place on the map.</p>
-        <p>You can also sort the points by clicking on the column's name. They are sorted by distance by default to show you the closest points to you.</p>
-
+        <h5>Table of Locations</h5>
+        <p>The table below the map offers a comprehensive list of all the markers. The content here can be filtered based on the options you've selected above. Click on any location in the table to show you that place on the map.</p>
+        <p>You can also sort the locations by different criteria by clicking on the column headers. By default, locations are sorted by distance, making it easy to find the closest points to you.</p>
 
         </div>
 </body>
