@@ -76,11 +76,14 @@ namespace City_Easter_Eggs.Controllers
             public bool LikedByCurrentUser { get; set; }
             public bool FavoriteByCurrentUser { get; set; }
 
+            public bool IsTopPercentile { get; set; }
+
             public PointOfInterestFrontend(PointOfInterest point, User? loggedInUser)
             {
                 Point = point;
                 LikedByCurrentUser = loggedInUser != null && loggedInUser.LikedPoints.Any(x => x.PointId == point.PointId);
                 FavoriteByCurrentUser = loggedInUser != null && loggedInUser.FavoritedPoints.Any(x => x.PointId == point.PointId);
+                IsTopPercentile = point.Likes >= PointsService.TopPercentileLikes;
             }
         }
 
