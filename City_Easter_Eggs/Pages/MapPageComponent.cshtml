@@ -908,6 +908,35 @@
                                                                 padding-bottom: 10px;
                                                                 font-weight: bold;
                                                             }
+                                                            #imageSectionContainer {
+                                                                display: flex;
+                                                                justify-content: center;
+                                                                align-items: center;
+                                                                width: 100%;
+                                                                margin-bottom: 10px;
+                                                            }
+                                                            #imageSection {
+                                                                display: flex;
+                                                                justify-content: center;
+                                                                align-items: center;
+                                                                width: 100%;
+                                                                max-width: 200px;
+                                                                max-height: 210px;
+                                                                overflow: hidden;
+                                                                padding: 3px;
+                                                            }
+                                                            #imageSection img {
+                                                                max-width: inherit;
+                                                                max-height: inherit;
+                                                                object-fit: contain;
+                                                            }
+                                                            #uploadLabel {
+                                                                margin-bottom: 10px;
+                                                                font-size: 15px;
+                                                                font-weight: normal;
+                                                                color: #104d8f;
+                                                                text-decoration: underline;
+                                                            }
                                                         </style>
                                                         <input type="hidden" id="userLocationLongitude" name="UserLocationLongitude" value="${e.latLng.lng()}">
                                                         <input type="hidden" id="userLocationLatitude" name="UserLocationLatitude" value="${e.latLng.lat()}">
@@ -924,9 +953,13 @@
                                                         </div>
                                                         <div>
                                                             <input type="file" accept="image/*" name="image" id="imageFile" style="display: none;">
-                                                            <label for="imageFile" style="cursor: pointer;">Upload Image</label>
+                                                            <label id="uploadLabel" for="imageFile" style="cursor: pointer;">Upload Image</label>
                                                             <br>
-                                                            <img id="imageFileOutput" width="150" />
+                                                             <div id="imageSectionContainer">
+                                                                <div id="imageSection">
+                                                                    <img id="imageFileOutput"/>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="mb-3 d-flex justify-content-between">
                                                             <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
@@ -1010,6 +1043,7 @@
                         if (imageUploader != null)
                             imageUploader.addEventListener('change', (ev) => {
                                 var selectedFile = imageUploader.files[0];
+                                if (selectedFile == null) return;
                                 imageShow.src = URL.createObjectURL(selectedFile)
                                 imageShow.onload = () => {
                                     URL.revokeObjectURL(imageShow.src);
