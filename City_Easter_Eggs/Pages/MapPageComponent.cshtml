@@ -435,12 +435,6 @@
                                                             <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Name</label>
                                                             <div id="name">${marker.title}</div>
                                                         </div>
-                                                        ${description ? `
-                                                            <div id="descriptionSection">
-                                                                <label for="description" class="form-label" style="font-weight: bold; font-size: 16px;">Description</label>
-                                                                <div id="description">${description}</div>
-                                                            </div>
-                                                        ` : ''}
                                                         ${imagePath ? `
                                                                     <img src="images/${imagePath}" width="150" />
                                                         ` : ''}
@@ -801,7 +795,7 @@
             if (lastPos != null) {
                 var dist = GetPosDist(lastPos, pos);
                 if (dist < 0.0001) return;
-                console.log("Moved Distance", dist);
+                //console.log("Moved Distance", dist);
             }
             lastPos = pos;
 
@@ -826,7 +820,7 @@
                 // if showInRadius is true, redraw the points
             }
 
-            console.log("You are at", "Latitude : " + latitude + " Longitude: " + longitude);
+            //console.log("You are at", "Latitude : " + latitude + " Longitude: " + longitude);
         }
 
         async function updateLocation() {
@@ -920,10 +914,6 @@
                                                                 <label class="text-danger" style="font-size: 12px">* Required</label>
                                                             </span>
                                                             <input type="text" id="name" name="Name" class="form-control" required placeholder="Name">
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="description" class="form-label">Description</label>
-                                                            <textarea id="description" name="Description" class="form-control" placeholder="Description" rows="5"></textarea>
                                                         </div>
                                                         <div>
                                                             <input type="file" accept="image/*" name="image" id="imageFile" style="display: none;">
