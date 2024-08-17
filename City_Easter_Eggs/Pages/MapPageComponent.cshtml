@@ -6,7 +6,7 @@
 <html>
 <head>
     <title></title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style type="text/css">
         html, body, #map {
@@ -14,6 +14,17 @@
             margin: 0px;
             padding: 0px
         }
+
+        #map {
+            height: 700px;
+        }
+
+        @@media (max-width: 600px) {
+            #map {
+                height: 550px;
+            }
+        }
+
         body {
             background: radial-gradient(circle at 20% 20%, rgba(0, 0, 255, 0.1), transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 165, 0, 0.1), transparent 50%),
                 radial-gradient(circle at 50% 50%, rgba(255, 255, 0, 0.1), transparent 50%),
@@ -895,9 +906,6 @@
                     form.id = "createPointForm";
                     form.innerHTML = `
                                                         <style>
-                                                            #createPointForm {
-                                                                width: 300px;
-                                                            }
                                                             #createPointForm button {
                                                                 padding: 7px 20px;
                                                                 font-size: 14px;
@@ -908,7 +916,7 @@
                                                                 padding-bottom: 10px;
                                                                 font-weight: bold;
                                                             }
-                                                            #imageSectionContainer {
+                                                            #imageSectionContainer, #uploadLabel {
                                                                 display: flex;
                                                                 justify-content: center;
                                                                 align-items: center;
@@ -953,13 +961,13 @@
                                                         </div>
                                                         <div>
                                                             <input type="file" accept="image/*" name="image" id="imageFile" style="display: none;">
-                                                            <label id="uploadLabel" for="imageFile" style="cursor: pointer;">Upload Image</label>
-                                                            <br>
+                                                            <label id="uploadLabel" for="imageFile" style="cursor: pointer;">
                                                              <div id="imageSectionContainer">
                                                                 <div id="imageSection">
-                                                                    <img id="imageFileOutput"/>
+                                                                    <img id="imageFileOutput" src="/UploadImageIcon.png"/>
                                                                 </div>
                                                             </div>
+                                                            </label>
                                                         </div>
                                                         <div class="mb-3 d-flex justify-content-between">
                                                             <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
@@ -1240,7 +1248,7 @@
     </script>
 </head>
 <body>
-    <div style="height: 700px" id="map"></div>
+    <div id="map"></div>
     
     <div id="optionsSection" style="margin-top: 50px;">
         <h3>Options</h3>
