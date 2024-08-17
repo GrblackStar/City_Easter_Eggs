@@ -150,24 +150,6 @@
             display: inline;
         }
 
-        /* th .sort-indicator::after {
-            content: '';
-            display: inline-block;
-            margin-left: 5px;
-            border: 4px solid transparent;
-            border-top-color: white;
-            vertical-align: middle;
-        }
-
-        th.asc .sort-indicator::after {
-            border-top-color: transparent;
-            border-bottom-color: white;
-        }
-
-        th.desc .sort-indicator::after {
-            border-top-color: white;
-        } */
-
         @@keyframes fadein {
             from {
                 opacity: 0;
@@ -272,6 +254,8 @@
                 var markerId = thisPoint.pointId;
                 var likedByUser = pointData.likedByCurrentUser;
                 var favoriteByUser = pointData.favoriteByCurrentUser;
+
+                var isOwner = pointData.point.pointCreatorId === CurrentUserId;
 
                 const { target } = domEvent;
 
@@ -385,7 +369,7 @@
                                                     <style>
                                                         #infoWindowContent {
                                                             min-width: 200px;
-                                                            max-width: 400px;
+                                                            max-width: 200px;
                                                             max-height: 600px;
                                                             overflow: hidden;
                                                         }
@@ -428,6 +412,22 @@
                                                             transition: transform 0.3s;
                                                             transform: scale(1.2);
                                                         }
+                                                        #imageSection {
+                                                            display: flex;
+                                                            justify-content: center;
+                                                            align-items: center;
+                                                            width: 100%;
+                                                            max-width: 200px;
+                                                            max-height: 210px;
+                                                            overflow: hidden;
+                                                            padding: 3px;
+                                                        }
+                                                        #imageSection img {
+                                                            max-width: inherit;
+                                                            max-height: inherit;
+                                                            object-fit: contain;
+                                                            border: 1px solid #526375;
+                                                        }
                                                     </style>
 
                                                     <div id="infoWindowContent">
@@ -436,13 +436,20 @@
                                                             <div id="name">${marker.title}</div>
                                                         </div>
                                                         ${imagePath ? `
-                                                                    <img src="images/${imagePath}" width="150" />
+                                                            <div id="imageSection">
+                                                                <img src="images/${imagePath}" alt="Point Image" />
+                                                            </div>
                                                         ` : ''}
                                                         
                                                         <div id="buttonSection">
                                                             <div id="likeSection">
-                                                                <button id="likeButton" style="margin-left: 5px"><img src="${likedByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
-                                                                <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
+                                                                ${isOwner ? `
+                                                                    <label style="font-weight: lighter; font-size: 16px; margin-left: 5px; padding: 2px;">Likes</label>
+                                                                    <label id="likes" style="font-weight: lighter; font-size: 16px; margin-left: 5px; padding: 2px;">${likes}</label>
+                                                                ` : `
+                                                                    <button id="likeButton" style="margin-left: 5px"><img src="${likedByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
+                                                                    <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
+                                                                `}
                                                             </div>
                                                             <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'BookMarkedIcon.png' : 'BookMarkIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                                                         </div>
