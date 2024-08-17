@@ -273,10 +273,10 @@
                 var thisPoint = pointData.point;
                 var likes = thisPoint.likes;
                 var description = thisPoint.description;
+                var imagePath = thisPoint.imageId;
                 var markerId = thisPoint.pointId;
                 var likedByUser = pointData.likedByCurrentUser;
                 var favoriteByUser = pointData.favoriteByCurrentUser;
-
                 const { target } = domEvent;
 
                 let isLikedByUser = likedByUser;
@@ -443,6 +443,10 @@
                                                                 <div id="description">${description}</div>
                                                             </div>
                                                         ` : ''}
+                                                        ${imagePath ? `
+                                                                    <img src="images/${imagePath}" width="150" />
+                                                        ` : ''}
+                                                        
                                                         <div id="buttonSection">
                                                             <div id="likeSection">
                                                                 <button id="likeButton" style="margin-left: 5px"><img src="${likedByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
@@ -914,11 +918,19 @@
                                                             <label for="description" class="form-label">Description</label>
                                                             <textarea id="description" name="Description" class="form-control" placeholder="Description" rows="5"></textarea>
                                                         </div>
+                                                        <div>
+                                                            <input type="file" accept="image/*" name="image" id="imageFile" style="display: none;">
+                                                            <label for="imageFile" style="cursor: pointer;">Upload Image</label>
+                                                            <br>
+                                                            <img id="imageFileOutput" width="150" />
+                                                        </div>
                                                         <div class="mb-3 d-flex justify-content-between">
                                                             <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
                                                             <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px">Cancel</button>
                                                         </div>
                                                     `;
+
+                    var lastImageBase64 = null;
 
                     form.addEventListener('submit', function (event) {
                         event.preventDefault();
@@ -926,6 +938,7 @@
                         var formData = new FormData(form);
                         var object = {};
                         formData.forEach((value, key) => object[key] = value);
+                        object.image = lastImageBase64;
                         var json = JSON.stringify(object);
 
                         fetch('/Points/CreatePoint', {
@@ -969,26 +982,39 @@
                         return;
                     }
 
-                    // If an info window already exists, reuse it
-                    if (isInfoWindowOpen(panelCreatePoint)) {
-                    }
-                    else {
-                        // Create a new info window with the form as its content
-                        panelCreatePoint = new InfoWindow({
-                            content: form
-                        });
-                        panelCreatePoint.open(map);
+                    // Create a new info window with the form as its content
+                    panelCreatePoint = new InfoWindow({
+                        content: form
+                    });
+                    panelCreatePoint.open(map);
 
-                        // Event listener to the close button of the info window to close it.
-                        // Using "domready" ensures that the dom is loaded and can find the component
-                        google.maps.event.addListener(panelCreatePoint, 'domready', function () {
-                            var cancelButton = document.getElementById('createPointCancel');
-                            if (!cancelButton) return;
-                            cancelButton.addEventListener('click', function () {
-                                panelCreatePoint.close();
-                            });
+                    // Event listener to the close button of the info window to close it.
+                    // Using "domready" ensures that the dom is loaded and can find the component
+                    google.maps.event.addListener(panelCreatePoint, 'domready', function () {
+                        var cancelButton = document.getElementById('createPointCancel');
+                        if (!cancelButton) return;
+                        cancelButton.addEventListener('click', function () {
+                            panelCreatePoint.close();
                         });
-                    }
+                    });
+
+
+                    // attach image helpers
+                    google.maps.event.addListener(panelCreatePoint, 'domready', function () {
+                        var imageUploader = document.getElementById('imageFile');
+                        var imageShow = document.getElementById('imageFileOutput');
+                        if (imageUploader != null)
+                            imageUploader.addEventListener('change', (ev) => {
+                                var selectedFile = imageUploader.files[0];
+                                imageShow.src = URL.createObjectURL(selectedFile)
+                                imageShow.onload = () => {
+                                    URL.revokeObjectURL(imageShow.src);
+                                };
+                                convertFileToBase64(selectedFile).then(x => {
+                                    lastImageBase64 = x
+                                })
+                            });
+                    });
 
                     // Open the info window at the clicked location
                     panelCreatePoint.setPosition(e.latLng);
@@ -1152,12 +1178,6 @@
             });
         }
 
-        async function updatePoints() {
-            // this gets the points more frequently -> 5 minutes
-            await drawPoints();
-            setTimeout(updatePoints, 300000);
-        }
-
         function openGoogleMaps(lat, lng) {
             const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
             // opens a new tab: window.open(googleMapsUrl, '_blank');
@@ -1179,7 +1199,6 @@
         await updateLocation();
         showSmallCircle(50, lastPos);
         showInnerCircle(5000, lastPos);
-        await updatePoints();
     </script>
 </head>
 <body>

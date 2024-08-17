@@ -6,6 +6,7 @@ using City_Easter_Eggs.QuadTree;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using System.Globalization;
 using System.Security.Claims;
 using static City_Easter_Eggs.Controllers.PointsController;
 
@@ -191,21 +192,22 @@ namespace City_Easter_Eggs.Controllers
             return new PointOfInterestFrontend(point, currentUser);
         }
 
-        public async Task CreatePointAsync(string name, string description, double longitude, double latitude)
+        public async Task CreatePointAsync(string name, string description, double longitude, double latitude, string? imageId)
         {
             var user = _httpContextAccessor.HttpContext?.User;
             var currentUser = await _userService.GetUserFromPrincipal(user);
 
             if (description == null) description = "No Description";
 
-            var point = (new PointOfInterest
+            var point = new PointOfInterest
             {
                 Name = name,
                 Description = description,
                 Latitude = latitude,
                 Longitude = longitude,
-                Creator = currentUser
-            });
+                Creator = currentUser,
+                ImageId = imageId ?? string.Empty
+            };
 
             _context.POIs.Add(point);
             await _context.SaveChangesAsync();
