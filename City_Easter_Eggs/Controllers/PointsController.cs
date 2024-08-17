@@ -70,8 +70,6 @@ namespace City_Easter_Eggs.Controllers
             string imageId = null;
             if (!string.IsNullOrEmpty(input.Image))
             {
-                bool valid = true;
-
                 const string imageFormatHeader = "data:image/";
                 const string base64Header = "base64,";
 

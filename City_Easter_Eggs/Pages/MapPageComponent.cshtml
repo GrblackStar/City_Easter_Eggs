@@ -226,7 +226,7 @@
             likes: 'none', // Default sorted column
             distance: 'asc',
             createdOn: 'none',
-            creator: 'none',
+            pointCreatorName: 'none',
         };
 
         let currentSortedColumn = 'distance'; 
@@ -239,13 +239,6 @@
 
             const normalEggImage = document.createElement("img");
 
-            if (pointData.point.pointCreatorName === "System") normalEggImage.src = "/BlueEgg.png";
-            else if (pointData.point.pointCreatorId === CurrentUserId) normalEggImage.src = "/YellowEgg.png";
-            else if (pointData.likedByCurrentUser) normalEggImage.src = "/RedEgg.png"
-            else if (pointData.favoriteByCurrentUser) normalEggImage.src = "/GreenEgg.png"
-            else if (pointData.isTopPercentile) normalEggImage.src = "/PurpleEgg.png";
-            else normalEggImage.src = "/NormalEgg.png";
-
             normalEggImage.width = 28;
             normalEggImage.height = 28;
 
@@ -256,6 +249,8 @@
                 content: normalEggImage,
             });
 
+            normalEggImage.src = getMarkerImage(pointData);
+
             // Add a click listener for each marker, and set up the info window.
             marker.addListener('click', ({ domEvent, latLng }) => {
                 // Get latest data from array
@@ -265,7 +260,7 @@
                     var thisPoint = pointsFromBackend[i];
                     if (thisPoint.point.pointId == pointId)
                     {
-                        pointData = thisPoint
+                        pointData = thisPoint;
                     }
                 }
                 if (pointData == null) return;
@@ -277,6 +272,7 @@
                 var markerId = thisPoint.pointId;
                 var likedByUser = pointData.likedByCurrentUser;
                 var favoriteByUser = pointData.favoriteByCurrentUser;
+
                 const { target } = domEvent;
 
                 let isLikedByUser = likedByUser;
@@ -314,12 +310,13 @@
                                     this.classList.add('animate');
                                     setTimeout(() => {
                                         let likeButtonImage = document.querySelector('#likeButton img');
-                                        likeButtonImage.src = isLikedByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
+                                        if (likeButtonImage) likeButtonImage.src = isLikedByUser ? 'HeartIcon.png' : 'HeartedIcon.png';
                                         isLikedByUser = !isLikedByUser;
                                     }, 100);
                                     setTimeout(() => {
                                         this.classList.remove('animate');
                                     }, 200);
+                                    normalEggImage.src = getMarkerImage(data);
                                     createTable();
                                 })
                                 .catch((error) => {
@@ -359,12 +356,13 @@
                                 // Change the image after the button has finished growing, than resize it
                                 setTimeout(() => {
                                     let heartButtonImage = document.querySelector('#favoriteButton img');
-                                    heartButtonImage.src = isFavoriteByUser ? 'BookMarkIcon.png' : 'BookMarkedIcon.png';
+                                    if (heartButtonImage) heartButtonImage.src = isFavoriteByUser ? 'BookMarkIcon.png' : 'BookMarkedIcon.png';
                                     isFavoriteByUser = !isFavoriteByUser;
                                 }, 100);
                                 setTimeout(() => {
                                     this.classList.remove('animate');
                                 }, 200);
+                                normalEggImage.src = getMarkerImage(data);
                             })
                             .catch((error) => {
                                 showToast('Error:' + error, 'error');
@@ -471,6 +469,15 @@
                 });
             });
             return marker;
+        }
+
+        function getMarkerImage(pointData) {
+            if (pointData.point.pointCreatorName === "System") return "/BlueEgg.png";
+            else if (pointData.point.pointCreatorId === CurrentUserId) return "/YellowEgg.png";
+            else if (pointData.likedByCurrentUser) return "/RedEgg.png";
+            else if (pointData.favoriteByCurrentUser) return "/GreenEgg.png";
+            else if (pointData.isTopPercentile) return "/PurpleEgg.png";
+            else return "/NormalEgg.png";
         }
 
         function AddMarkerToMap(position, name) {
@@ -1257,7 +1264,7 @@
                         <th data-column="likes" onclick="toggleSort('likes')">Likes <span class="sort-indicator"></span></th>
                         <th data-column="distance" onclick="toggleSort('distance')">Distance (km) <span class="sort-indicator"></span></th>
                         <th data-column="createdOn" onclick="toggleSort('createdOn')">Created On <span class="sort-indicator"></span></th>
-                        <th data-column="creator" onclick="toggleSort('creator')">Creator <span class="sort-indicator"></span></th>
+                        <th data-column="pointCreatorName" onclick="toggleSort('pointCreatorName')">Creator <span class="sort-indicator"></span></th>
                     </tr>
                 </thead>
                 <tbody>
