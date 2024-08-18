@@ -379,8 +379,7 @@
                 panelPointInfo.setContent(`
                                                     <style>
                                                         #infoWindowContent {
-                                                            min-width: 200px;
-                                                            max-width: 200px;
+                                                            min-width: 180px;
                                                             max-height: 600px;
                                                             overflow: hidden;
                                                         }
@@ -443,7 +442,7 @@
 
                                                     <div id="infoWindowContent">
                                                         <div id="nameSection">
-                                                            <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Име на локацията</label>
+                                                            <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Име</label>
                                                             <div id="name">${marker.title}</div>
                                                         </div>
                                                         ${imagePath ? `
@@ -518,7 +517,7 @@
                 panelPointInfo.setContent(`
                     <style>
                         #infoWindowContent {
-                            min-width: 175px;
+                            min-width: 190px;
                             font-size: 14px;
                             font-weight: bold;
                         }
@@ -1341,19 +1340,22 @@
         
         // tooltip position strategy
         document.addEventListener('DOMContentLoaded', function () {
-            const infoIcon = document.querySelector('.info-icon');
-            const tooltip = infoIcon.querySelector('.tooltip-text');
-            infoIcon.addEventListener('mouseover', function () {
-                const rect = tooltip.getBoundingClientRect();
-                const isVisible = (rect.top >= 0) && (rect.left >= 0) && (rect.bottom <= window.innerHeight) && (rect.right <= window.innerWidth);
+            const infoIcons = document.querySelectorAll('.info-icon');
+            
+            infoIcons.forEach(function(infoIcon) {
+                const tooltip = infoIcon.querySelector('.tooltip-text');
+                infoIcon.addEventListener('mouseover', function () {
+                    const rect = tooltip.getBoundingClientRect();
+                    const isVisible = (rect.top >= 0) && (rect.left >= 0) && (rect.bottom <= window.innerHeight) && (rect.right <= window.innerWidth);
 
-                if (!isVisible) {
-                    tooltip.style.bottom = 'auto';
-                    tooltip.style.top = '125%';
-                } else {
-                    tooltip.style.bottom = '125%';
-                    tooltip.style.top = 'auto';
-                }
+                    if (!isVisible) {
+                        tooltip.style.bottom = 'auto';
+                        tooltip.style.top = '125%';
+                    } else {
+                        tooltip.style.bottom = '125%';
+                        tooltip.style.top = 'auto';
+                    }
+                });
             });
         });
     </script>
