@@ -45,7 +45,7 @@ namespace City_Easter_Eggs.Data.Identity
 		        ModelStateEntry? recaptchaState = ModelState["Recaptcha"];
 		        if (recaptchaState != null && recaptchaState.Errors.Count > 0)
 		        {
-			        ModelState.AddModelError(string.Empty, "Recaptcha check failed - please try again, human.");
+			        ModelState.AddModelError(string.Empty, "reCAPTCHA проверката не бе успешна - опитай отново, human...");
 			        return Page();
 		        }
 	        }
@@ -56,7 +56,7 @@ namespace City_Easter_Eggs.Data.Identity
                 (IdentityResult result, User? user) = await _userManager.VerifyUserSignIn(Input.Username, Input.Password);
                 if (!result.Succeeded || user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "Невалиден опит.");
                     return Page();
                 }
 
@@ -71,18 +71,18 @@ namespace City_Easter_Eggs.Data.Identity
 
     public class LoginInputModel
     {
-        [Required]
-        [StringLength(25, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [Display(Name = "Username")]
+        [Required(ErrorMessage = "Това поле е задължително!")]
+        [StringLength(25, ErrorMessage = "Името трябва да бъде най-малко {2} и най-много {1} символа.", MinimumLength = 6)]
+        [Display(Name = "Потребителско име")]
         public string Username { get; set; } = default!;
 
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [Required(ErrorMessage = "Това поле е задължително!")]
+        [StringLength(100, ErrorMessage = "Паролата трябва да бъде най-малко {2} и най-много {1} символа.", MinimumLength = 6)]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
+        [Display(Name = "Парола")]
         public string Password { get; set; } = default!;
 
-        [Display(Name = "Remember me?")]
+        [Display(Name = "Запомни ме?")]
         public bool RememberMe { get; set; } = default!;
     }
 }

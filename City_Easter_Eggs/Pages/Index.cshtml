@@ -2,7 +2,7 @@
 @using City_Easter_Eggs.Controllers
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Начало";
 }
 @inject MapsService MapService;
 @inject UserService UserManager;
@@ -14,7 +14,7 @@
 else
 {
     <div>
-        <h1> Welcome </h1>
+        <h1 style="margin-bottom: 20px"> Добре дошли! </h1>
         <partial name="AboutPartial" />
     </div>
 }

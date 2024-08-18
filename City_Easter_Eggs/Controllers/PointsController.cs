@@ -1,4 +1,4 @@
-#region Using
+﻿#region Using
 
 using City_Easter_Eggs.Data;
 using City_Easter_Eggs.Models;
@@ -119,8 +119,8 @@ namespace City_Easter_Eggs.Controllers
 
         public class CreatePointInputModel
         {
-            [Required(ErrorMessage = "Name is required")]
-            [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 3)]
+            [Required(ErrorMessage = "Името е задължително")]
+            [StringLength(50, ErrorMessage = "Името трябва да е между {2} и {1} символа.", MinimumLength = 3)]
             public string Name { get; set; }
 
             [StringLength(250, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 0)]

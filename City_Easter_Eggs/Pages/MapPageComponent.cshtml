@@ -48,7 +48,7 @@
 
         .info-icon .tooltip-text {
             visibility: hidden;
-            width: 200px;
+            width: 250px;
             background-color: #555;
             color: #fff;
             text-align: center;
@@ -315,11 +315,11 @@
                                     createTable();
                                 })
                                 .catch((error) => {
-                                    showToast('Error:' + error, 'error');
+                                    showToast('Грешка:' + error, 'error');
                                 });
                         } else {
                             // If the distance is more than 50 meters, log a message and do not make the fetch request
-                            showToast('You are too far away to like this point.', 'error');
+                            showToast('Не сте достатъчно близо за да харесате.', 'error');
                         }
                     }
                 };
@@ -360,7 +360,7 @@
                                 normalEggImage.src = getMarkerImage(data);
                             })
                             .catch((error) => {
-                                showToast('Error:' + error, 'error');
+                                showToast('Грешка:' + error, 'error');
                             });
                     }
                 };
@@ -443,7 +443,7 @@
 
                                                     <div id="infoWindowContent">
                                                         <div id="nameSection">
-                                                            <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Name</label>
+                                                            <label for="name" class="form-label" style="font-weight: bold; font-size: 16px;">Име на локацията</label>
                                                             <div id="name">${marker.title}</div>
                                                         </div>
                                                         ${imagePath ? `
@@ -455,8 +455,8 @@
                                                         <div id="buttonSection">
                                                             <div id="likeSection">
                                                                 ${isOwner ? `
-                                                                    <label style="font-weight: lighter; font-size: 16px; margin-left: 5px; padding: 2px;">Likes</label>
-                                                                    <label id="likes" style="font-weight: lighter; font-size: 16px; margin-left: 5px; padding: 2px;">${likes}</label>
+                                                                    <label style="font-weight: lighter; font-size: 16px; margin-left: 5px; padding: 2px;">Харесвания</label>
+                                                                    <label id="likes" style="font-weight: normal; font-size: 18px; margin-left: 5px; padding: 2px;">${likes}</label>
                                                                 ` : `
                                                                     <button id="likeButton" style="margin-left: 5px"><img src="${likedByUser ? 'HeartedIcon.png' : 'HeartIcon.png'}" alt="Like" style="width: 25px; height: 25px;"></button>
                                                                     <label id="likes" style="font-weight: normal; font-size: 20px; margin-left: 5px; padding: 2px;">${likes}</label>
@@ -464,7 +464,7 @@
                                                             </div>
                                                             <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'BookMarkedIcon.png' : 'BookMarkIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                                                         </div>
-                                                        <button id="directionsButton" type="submit" class="btn btn-lg btn-primary"> Take me there </button>
+                                                        <button id="directionsButton" type="submit" class="btn btn-lg btn-primary"> Заведи ме там </button>
                                                     </div>
                                                 `);
                 panelPointInfo.open(marker.map, marker);
@@ -518,8 +518,8 @@
                 panelPointInfo.setContent(`
                     <style>
                         #infoWindowContent {
-                            min-width: 150px;
-                            font-size: 16px;
+                            min-width: 175px;
+                            font-size: 14px;
                             font-weight: bold;
                         }
                     </style>
@@ -802,7 +802,7 @@
                 // second: '2-digit',
                 // hour12: false
             };
-            return date.toLocaleString('en-US', options).replace(',', '');
+            return date.toLocaleString('bg-BG', options).replace(',', '');
         }
 
         function showLocation(position) {
@@ -819,7 +819,7 @@
 
             // If the user marker doesn't exist, create it.
             if (!userMarker) {
-                userMarker = AddMarkerToMap(pos, "Current Location", true);
+                userMarker = AddMarkerToMap(pos, "Текущо местоположение", true);
                 userMarker.optimized = false;
                 userMarker.zIndex = 99999999;
             }
@@ -834,7 +834,7 @@
                 showInnerCircle(5000, pos);
                 showSmallCircle(50, pos);
                 showOutsideCircle(5000, pos);
-                showToast('Your current location changed', 'success');
+                showToast('Местоположението е променено', 'success');
                 // if showInRadius is true, redraw the points
             }
 
@@ -846,23 +846,23 @@
                 let position = await GetUserLocation();
                 showLocation(position);
             } else {
-                showToast('Sorry, browser does not support geolocation!', 'error');
+                showToast('Съжалявам, браузърът не поддържа геолокация!', 'error');
             }
             setTimeout(updateLocation, 2000)
         }
 
         function errorHandler(err) {
             if (err.code == 1) {
-                showToast('Error: Access is denied!', 'error');
+                showToast('Грешка: Достъп отказан!', 'error');
             } else if (err.code == 2) {
-                showToast('Error: Position is unavailable!', 'error');
+                showToast('Грешка: Позицията е недостъпна!', 'error');
             }
         }
 
         function createCenterControl(map) {
             const controlButton = document.createElement("button");
             controlButton.className = "btn btn-lg btn-primary";
-            controlButton.textContent = "Back to my location";
+            controlButton.textContent = "Моята локация";
             // remove border and focus outline
             controlButton.style.outline = "none";
             controlButton.style.border = "none";
@@ -949,15 +949,15 @@
                                                         <input type="hidden" id="userLocationLongitude" name="UserLocationLongitude" value="${e.latLng.lng()}">
                                                         <input type="hidden" id="userLocationLatitude" name="UserLocationLatitude" value="${e.latLng.lat()}">
                                                         <div>
-                                                            <label id="mainText" for="name" class="form-label">ADD A POINT</label>
+                                                            <label id="mainText" for="name" class="form-label">Добавете локация</label>
                                                         </div>
                                                         <div id="createPointErrorContainer" class="text-danger mb-2" role="alert"></div>
                                                         <div class="mb-3">
-                                                            <label for="name" class="form-label">Location name</label>
+                                                            <label for="name" class="form-label">Име на локацията</label>
                                                             <span>
-                                                                <label class="text-danger" style="font-size: 12px">* Required</label>
+                                                                <label class="text-danger" style="font-size: 12px">* Задължително</label>
                                                             </span>
-                                                            <input type="text" id="name" name="Name" class="form-control" required placeholder="Name">
+                                                            <input type="text" id="name" name="Name" class="form-control" required placeholder="Име">
                                                         </div>
                                                         <div>
                                                             <input type="file" accept="image/*" name="image" id="imageFile" style="display: none;">
@@ -970,8 +970,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="mb-3 d-flex justify-content-between">
-                                                            <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Create Point</button>
-                                                            <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px">Cancel</button>
+                                                            <button id="createPointSubmit" type="submit" class="btn btn-lg btn-primary">Създай</button>
+                                                            <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px">Отказ</button>
                                                         </div>
                                                     `;
 
@@ -994,7 +994,7 @@
                             body: json,
                         }).then(response => {
                             if (response.ok) {
-                                showToast('You have created a point.', 'success');
+                                showToast('Споделихте локация.', 'success');
                                 panelCreatePoint.close();
                                 drawPoints();
                             } else {
@@ -1065,7 +1065,7 @@
                     // Open the info window at the clicked location
                     panelCreatePoint.setPosition(e.latLng);
                 } else {
-                    showToast('You are too far away to create a point here.', 'error');
+                    showToast('Твърде сте далече, за да създадете маркер.', 'error');
                     if (isInfoWindowOpen(panelPointInfo) || isInfoWindowOpen(panelCreatePoint)) {
                         if (isInfoWindowOpen(panelPointInfo))
                             panelPointInfo.close();
@@ -1139,7 +1139,7 @@
 
             // Dismiss button
             const dismissButton = document.createElement('button');
-            dismissButton.textContent = 'Dismiss';
+            dismissButton.textContent = 'Затвори';
             dismissButton.style.background = 'transparent';
             dismissButton.style.border = 'none';
             dismissButton.style.fontSize = '12px';
@@ -1251,45 +1251,45 @@
     <div id="map"></div>
     
     <div id="optionsSection" style="margin-top: 50px;">
-        <h3>Options</h3>
+        <h3>Опции</h3>
         <div>
-            <input type="checkbox" id="toggleShowInRadius" onclick="toggleOptions()" class="large-checkbox"> Show only points in 5 km radius
+            <input type="checkbox" id="toggleShowInRadius" onclick="toggleOptions()" class="large-checkbox"> Показвай само точки в радиус от 5 км
             <span class="info-icon">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="8" cy="8" r="7.5" stroke="black"/>
                     <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
                 </svg>
-                <span class="tooltip-text">This option will display points within a 5 km radius from the center of the map.</span>
+                <span class="tooltip-text">Тази опция ще скрие точки на разстояние по-голямо от 5 км от вас.</span>
             </span>
         </div>
         <div>
-            <input type="checkbox" id="toggleShowLikedByMe" onclick="toggleOptions()" class="large-checkbox"> Show only liked by me
+            <input type="checkbox" id="toggleShowLikedByMe" onclick="toggleOptions()" class="large-checkbox"> Премахни нехаресани от мен
             <span class="info-icon">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="8" cy="8" r="7.5" stroke="black"/>
                     <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
                 </svg>
-                <span class="tooltip-text">This option will display points that you have liked.</span>
+                <span class="tooltip-text">Тази опция ще скрие точки, които не сте харесали.</span>
             </span>
         </div>
         <div>
-            <input type="checkbox" id="toggleShowSaved" onclick="toggleOptions()" class="large-checkbox"> Show only saved
+            <input type="checkbox" id="toggleShowSaved" onclick="toggleOptions()" class="large-checkbox"> Премахни незапазени
             <span class="info-icon">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="8" cy="8" r="7.5" stroke="black"/>
                     <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
                 </svg>
-                <span class="tooltip-text">This option will display points that you have saved.</span>
+                <span class="tooltip-text">Тази опция ще скрие точки, които не сте запазили.</span>
             </span>
         </div>
         <div>
-            <input type="checkbox" id="toggleShowCreatedByMe" onclick="toggleOptions()" class="large-checkbox"> Show only created by me
+            <input type="checkbox" id="toggleShowCreatedByMe" onclick="toggleOptions()" class="large-checkbox"> Премахни създадени от други потребители
             <span class="info-icon">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="8" cy="8" r="7.5" stroke="black"/>
                     <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
                 </svg>
-                <span class="tooltip-text">This option will display points that you have created.</span>
+                <span class="tooltip-text">Тази опция ще скрие точки, които не са създадени от вас.</span>
             </span>
         </div>
     </div>
@@ -1299,11 +1299,11 @@
             <table id="pointsTable">
                 <thead>
                     <tr>
-                        <th data-column="name" onclick="toggleSort('name')">Name <span class="sort-indicator"></span></th>
-                        <th data-column="likes" onclick="toggleSort('likes')">Likes <span class="sort-indicator"></span></th>
-                        <th data-column="distance" onclick="toggleSort('distance')">Distance (km) <span class="sort-indicator"></span></th>
-                        <th data-column="createdOn" onclick="toggleSort('createdOn')">Created On <span class="sort-indicator"></span></th>
-                        <th data-column="pointCreatorName" onclick="toggleSort('pointCreatorName')">Creator <span class="sort-indicator"></span></th>
+                        <th data-column="name" onclick="toggleSort('name')">Име <span class="sort-indicator"></span></th>
+                        <th data-column="likes" onclick="toggleSort('likes')">Харесвания <span class="sort-indicator"></span></th>
+                        <th data-column="distance" onclick="toggleSort('distance')">Разстояние (km) <span class="sort-indicator"></span></th>
+                        <th data-column="createdOn" onclick="toggleSort('createdOn')">Създаване <span class="sort-indicator"></span></th>
+                        <th data-column="pointCreatorName" onclick="toggleSort('pointCreatorName')">Създадел <span class="sort-indicator"></span></th>
                     </tr>
                 </thead>
                 <tbody>

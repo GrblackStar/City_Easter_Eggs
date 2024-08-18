@@ -54,7 +54,7 @@ namespace City_Easter_Eggs.Controllers
                 return (IdentityResult.Failed(new IdentityError
                 {
                     Code = "NoSuchUser",
-                    Description = "Invalid username."
+                    Description = "Невалидно потребителско име."
                 }), null);
 
             PasswordVerificationResult passwordCheckResult = _hasher.VerifyHashedPassword(userFound.PasswordHash ?? "", password);
@@ -62,13 +62,13 @@ namespace City_Easter_Eggs.Controllers
                 return (IdentityResult.Failed(new IdentityError
                 {
                     Code = "WrongPassword",
-                    Description = "Wrong password."
+                    Description = "Невалидна парола."
                 }), null);
 
             return (IdentityResult.Success, userFound);
         }
 
-        private const string AllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        private const string AllowedCharacters = "абвгдежзийклмнопрстуфхцчшщьъюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЖЧШЩЬЪЮЯabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 
         // These constraints should match the frontend ones in RegisterInputModel for optimal(tm) experience.
         // todo: reference constants there
@@ -81,14 +81,14 @@ namespace City_Easter_Eggs.Controllers
                 return IdentityResult.Failed(new IdentityError
                 {
                     Code = "UsernameLength",
-                    Description = $"Username needs to be between {RequiredLength} and {UsernameMaxLength} characters long."
+                    Description = $"Потребителското име трябва да бъде между {RequiredLength} и {UsernameMaxLength} символа."
                 });
 
             if (username.Any(x => AllowedCharacters.IndexOf(x) == -1))
                 return IdentityResult.Failed(new IdentityError
                 {
                     Code = "UsernameInvalidCharacters",
-                    Description = "Your username can only contain alphanumeric characters."
+                    Description = "Потребителското име може да съдържа само букви и цифри."
                 });
 
             string normalizedUserName = username.ToUpperInvariant();
@@ -96,7 +96,7 @@ namespace City_Easter_Eggs.Controllers
                 return IdentityResult.Failed(new IdentityError
                 {
                     Code = "UsernameTaken",
-                    Description = "There is already a user with that username."
+                    Description = "Потребитеското име е заето."
                 });
 
             return IdentityResult.Success;
@@ -108,7 +108,7 @@ namespace City_Easter_Eggs.Controllers
                 return IdentityResult.Failed(new IdentityError
                 {
                     Code = "PasswordLength",
-                    Description = $"Password needs to be between {RequiredLength} and 100 characters long."
+                    Description = $"Паролата трябва да е между {RequiredLength} и 100 символа."
                 });
 
             return IdentityResult.Success;
