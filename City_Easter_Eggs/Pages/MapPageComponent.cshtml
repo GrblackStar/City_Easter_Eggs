@@ -214,6 +214,9 @@
         var showSavedOnly = false;
         var showCreatedByMeOnly = false;
 
+        var searchCriteriaColumn = null;
+        var searchCriteriaValue = null;
+
         let sortState = {
             name: 'none',
             likes: 'none', // Default sorted column
@@ -581,6 +584,14 @@
 
                 const isCreator = point.pointCreatorId === CurrentUserId;
 
+                if (searchCriteriaValue && searchCriteriaColumn) {
+                    const columnValue = String(point[searchCriteriaColumn]).toLowerCase();
+                    const searchValue = searchCriteriaValue.toLowerCase();
+                    if (!columnValue.includes(searchValue)) {
+                        continue; // Skip this point if it doesn't match the search criteria
+                    }
+                }
+
                 if ((showLikedOnly && pointData.likedByCurrentUser) ||
                     (showSavedOnly && pointData.favoriteByCurrentUser) ||
                     (showCreatedByMeOnly && isCreator) ||
@@ -596,7 +607,7 @@
 
                     // CSS classes
                     nameCell.classList.add('name-column');
-                    creatorCell.classList.add('creator-column');
+                    creatorCell.classList.add('pointCreatorName-column');
                     likesCell.classList.add('likes-column');
                     dateCell.classList.add('date-column');
                     distanceCell.classList.add('distance-column');
@@ -1230,11 +1241,14 @@
             window.location.href = googleMapsUrl;
         }
 
-        window.updateOnOpionsChange = function(radius, liked, saved, created) {
+        window.updateOnOpionsChange = function (radius, liked, saved, created, searchInput, selectedColumn) {
             showInRadius = radius;
             showLikedOnly = liked;
             showSavedOnly = saved;
             showCreatedByMeOnly = created;
+
+            searchCriteriaColumn = selectedColumn;
+            searchCriteriaValue = searchInput;
 
             showOutsideCircle(5000, lastPos);
             drawPoints();
@@ -1293,6 +1307,16 @@
         </div>
     </div>
 
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Търсене...">
+        <div class="radio-group">
+            <label><input type="radio" name="searchColumn" value="name" checked> Име</label>
+            <label><input type="radio" name="searchColumn" value="pointCreatorName"> Създадел</label>
+        </div>
+        <button id="searchButton" onclick="toggleOptions()">Търсене</button>
+        <button id="clearButton" onclick="clearSearch()">Изчисти</button>
+    </div>
+
     <div class="table-container">
         <div class="table-responsive">
             <table id="pointsTable">
@@ -1326,17 +1350,33 @@
         }
 
         function toggleOptions() {
+            const searchInput = document.getElementById('searchInput').value;
+            const selectedColumn = document.querySelector('input[name="searchColumn"]:checked').value;
+
             window.updateOnOpionsChange(
                 document.getElementById('toggleShowInRadius').checked,
                 document.getElementById('toggleShowLikedByMe').checked,
                 document.getElementById('toggleShowSaved').checked,
                 document.getElementById('toggleShowCreatedByMe').checked,
+                searchInput,
+                selectedColumn,
                 );
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            toggleOptions();
         }
 
         function toggleSort(column) {
             window.toggleSort(column);
         }
+
+        document.getElementById('searchInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                toggleOptions();
+            }
+        });
         
         // tooltip position strategy
         document.addEventListener('DOMContentLoaded', function () {
