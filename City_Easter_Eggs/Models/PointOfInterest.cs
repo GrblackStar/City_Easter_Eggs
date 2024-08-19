@@ -38,7 +38,7 @@ namespace City_Easter_Eggs.Models
         [JsonIgnore]
         public List<FavouritePoints> FavoritedPoints { get; set; } = new List<FavouritePoints>();
 
-        public string ImageId { get; set; }
+        public string ImageId { get; set; } = string.Empty;
 
         public PointOfInterest()
         {
