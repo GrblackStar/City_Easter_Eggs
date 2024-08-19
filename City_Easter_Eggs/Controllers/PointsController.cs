@@ -113,7 +113,7 @@ namespace City_Easter_Eggs.Controllers
                 Point = point;
                 LikedByCurrentUser = loggedInUser != null && loggedInUser.LikedPoints.Any(x => x.PointId == point.PointId);
                 FavoriteByCurrentUser = loggedInUser != null && loggedInUser.FavoritedPoints.Any(x => x.PointId == point.PointId);
-                IsTopPercentile = point.Likes >= PointsService.TopPercentileLikes;
+                IsTopPercentile = point.Likes > 0 && point.Likes >= PointsService.TopPercentileLikes;
             }
         }
 
