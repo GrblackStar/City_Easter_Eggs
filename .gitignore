@@ -119,3 +119,4 @@ src/.vs/config/applicationhost.config
 .idea/
 City_Easter_Eggs/appsettings.json
 City_Easter_Eggs/wwwroot/images/*
+City_Easter_Eggs/certificate.pfx
