@@ -51,6 +51,7 @@ namespace City_Easter_Eggs.Controllers
         {
             _reusableList.Clear();
             _quadTree.GetAllObjects(_reusableList);
+            if (_reusableList.Count == 0) return;
 
             _reusableList.Sort((a, b) => MathF.Sign(a.Likes - b.Likes));
             int top = (int)MathF.Floor(_reusableList.Count * 0.9f);
@@ -515,6 +516,7 @@ namespace City_Easter_Eggs.Controllers
                     PasswordHash = "NoLogin"
                 };
                 _context.Users.Add(adminUser);
+                _context.SaveChanges();
             }
 
             for (int i = 0; i < _systemPoints.Count; i++)
@@ -528,8 +530,7 @@ namespace City_Easter_Eggs.Controllers
                     _context.POIs.Add(systemPoint);
                 }
             }
-
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 
