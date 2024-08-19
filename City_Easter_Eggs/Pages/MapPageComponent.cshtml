@@ -906,8 +906,8 @@
         }
 
         function showLocation(position) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
+            var latitude = position.latitude;
+            var longitude = position.longitude;
             var pos = { lat: latitude, lng: longitude };
 
             if (lastPos != null) {
@@ -941,16 +941,6 @@
             //console.log("You are at", "Latitude : " + latitude + " Longitude: " + longitude);
         }
 
-        async function updateLocation() {
-            if (navigator.geolocation) {
-                let position = await GetUserLocation();
-                showLocation(position);
-            } else {
-                showToast('Съжалявам, браузърът не поддържа геолокация!', 'error');
-            }
-            setTimeout(updateLocation, 2000)
-        }
-
         function errorHandler(err) {
             if (err.code == 1) {
                 showToast('Грешка: Достъп отказан!', 'error');
@@ -980,8 +970,8 @@
 
         async function initMap() {
             // The map, centered at the current position
-            var myPos = await GetUserLocation();
-            var position = { lat: myPos.coords.latitude, lng: myPos.coords.longitude };
+            var myPos = GetUserLocation();
+            var position = { lat: myPos.latitude, lng: myPos.longitude };
             map = new Map(document.getElementById("map"), {
                 zoom: 80,
                 mapId: "DEMO_MAP_ID",
@@ -1344,8 +1334,19 @@
             drawPoints();
         }
 
+        StartWatchingUserLocation();
+        NotifyWhenLocationChanges((newLocation) => {
+            showLocation(newLocation);
+            if (newLocation.first)
+            {
+                if (map != null && lastPos != null)
+                {
+                    map.panTo(lastPos);
+                    map.setZoom(80);
+                }
+            }
+        });
         await initMap();
-        await updateLocation();
         showSmallCircle(50, lastPos);
         showInnerCircle(5000, lastPos);
     </script>
@@ -1386,7 +1387,7 @@
             </span>
         </div>
         <div>
-            <input type="checkbox" id="toggleShowCreatedByMe" onclick="toggleOptions()" class="large-checkbox"> Премахни създадени от други потребители
+            <input type="checkbox" id="toggleShowCreatedByMe" onclick="toggleOptions()" class="large-checkbox"> Покажи само мои
             <span class="info-icon">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="8" cy="8" r="7.5" stroke="black"/>
