@@ -34,6 +34,19 @@ namespace City_Easter_Eggs
             builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));
             builder.Services.AddRazorPages();
 
+#if !DEBUG
+            var certificatePassword = builder.Configuration["ssl_password"];
+
+            builder.WebHost.UseKestrel(options =>
+            {
+                options.Listen(System.Net.IPAddress.Any, 80);
+                options.Listen(System.Net.IPAddress.Any, 443, listenOptions =>
+                {
+                    listenOptions.UseHttps("certificate.pfx", certificatePassword);
+                });
+            });
+#endif
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
