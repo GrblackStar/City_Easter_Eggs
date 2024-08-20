@@ -19,7 +19,7 @@
             height: 700px;
         }
 
-        @@media (max-width: 600px) {
+        @@media (max-width: 400px) {
             #map {
                 height: 550px;
             }
@@ -58,7 +58,7 @@
             z-index: 1;
             bottom: 125%; /* Position the tooltip above the icon */
             left: 50%;
-            margin-left: -100px;
+            margin-left: -50px;
             opacity: 0;
             transition: opacity 0.3s;
             font-size: 14px;
@@ -188,13 +188,18 @@
             padding: 10px;
             font-size: 16px;
             outline: none;
+            box-sizing: border-box;
         }
 
         .input-button {
             background: #526375;
             border: none;
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
 
         .button-icon {
@@ -1355,46 +1360,26 @@
     <div id="map"></div>
     
     <div id="optionsSection" style="margin-top: 50px;">
-        <h3>Опции</h3>
-        <div>
-            <input type="checkbox" id="toggleShowInRadius" onclick="toggleOptions()" class="large-checkbox"> Показвай само точки в радиус от 5 км
+        <h3>Опции
             <span class="info-icon">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
+                    <circle cx="8" cy="8" r="7.5" stroke="black" />
                     <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
                 </svg>
-                <span class="tooltip-text">Тази опция ще скрие точки на разстояние по-голямо от 5 км от вас.</span>
+                <span class="tooltip-text">Тези опции филтрират точкоте, които виждате на картата и в таблицата.</span>
             </span>
+        </h3>
+        <div>
+            <input type="checkbox" id="toggleShowInRadius" onclick="toggleOptions()" class="large-checkbox"> Показвай само точки в радиус от 5 км
         </div>
         <div>
             <input type="checkbox" id="toggleShowLikedByMe" onclick="toggleOptions()" class="large-checkbox"> Премахни нехаресани от мен
-            <span class="info-icon">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
-                    <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
-                </svg>
-                <span class="tooltip-text">Тази опция ще скрие точки, които не сте харесали.</span>
-            </span>
         </div>
         <div>
             <input type="checkbox" id="toggleShowSaved" onclick="toggleOptions()" class="large-checkbox"> Премахни незапазени
-            <span class="info-icon">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
-                    <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
-                </svg>
-                <span class="tooltip-text">Тази опция ще скрие точки, които не сте запазили.</span>
-            </span>
         </div>
         <div>
             <input type="checkbox" id="toggleShowCreatedByMe" onclick="toggleOptions()" class="large-checkbox"> Покажи само мои
-            <span class="info-icon">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="8" cy="8" r="7.5" stroke="black"/>
-                    <text x="8" y="12" text-anchor="middle" font-size="10" fill="black">i</text>
-                </svg>
-                <span class="tooltip-text">Тази опция ще скрие точки, които не са създадени от вас.</span>
-            </span>
         </div>
     </div>
 
