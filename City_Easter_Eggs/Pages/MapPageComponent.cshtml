@@ -9,10 +9,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style type="text/css">
-        html, body, #map {
+        html, body, #map, #map-container {
             height: 100%;
             margin: 0px;
             padding: 0px
+        }
+       
+        #map-container {
+            position: relative;
         }
 
         #map {
@@ -23,6 +27,56 @@
             #map {
                 height: 550px;
             }
+            #loadingOverlay {
+                height: 550px;
+            }
+        }
+        #loadingOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .loading-icon {
+            width: 50px;
+            height: 50px;
+            border: 5px solid white;
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        .loading-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .location-text {
+            font-size: 15px;
+            margin-top: 15px;
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         body {
@@ -1178,94 +1232,6 @@
             map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerControlDiv);
         }
 
-        function showToast(message, type) {
-            // Check if a toast already exists, so it doesn't open multiple at the same time
-            if (document.querySelector('.toast')) {
-                return;
-            }
-
-            // Create toast container if it doesn't exist
-            let toastContainer = document.getElementById('toastContainer');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.id = 'toastContainer';
-                toastContainer.style.position = 'fixed';
-                toastContainer.style.top = '20px';
-                toastContainer.style.left = '50%';
-                toastContainer.style.transform = 'translateX(-50%)';
-                toastContainer.style.zIndex = '9999';
-                toastContainer.style.display = 'flex';
-                toastContainer.style.justifyContent = 'center';
-                toastContainer.style.alignItems = 'center';
-                toastContainer.style.pointerEvents = 'none';
-                document.body.appendChild(toastContainer);
-            }
-
-            // Create toast
-            const toast = document.createElement('div');
-            toast.className = 'toast'; // for easy selection
-            toast.style.background = type === 'success' ? '#689F38' : '#CF1A2B';
-            toast.style.color = 'white';
-            toast.style.padding = '5px';
-            toast.style.minWidth = '300px';
-            toast.style.borderRadius = '7px';
-            toast.style.boxShadow = '0 0.125rem 0.25rem grey';
-            toast.style.fontSize = '14px';
-            toast.style.display = 'flex';
-            toast.style.justifyContent = 'space-between';
-            toast.style.alignItems = 'center';
-            toast.style.animation = 'fadein 0.5s, fadeout 0.5s 2.5s';
-
-            // Icon
-            const icon = document.createElement('img');
-            icon.src = type === 'success' ? 'CheckIcon.svg' : 'CloseIcon.svg';
-            icon.style.width = '14px';
-            icon.style.height = '14px';
-            icon.style.marginRight = '10px';
-            icon.style.marginLeft = '7px';
-            icon.style.filter = 'invert(1)'; // Makes the icon white
-            toast.appendChild(icon);
-
-            // Message
-            const toastMessage = document.createElement('span');
-            toastMessage.textContent = message;
-            toastMessage.style.whiteSpace = 'nowrap';
-            toast.appendChild(toastMessage);
-
-            // Dismiss button
-            const dismissButton = document.createElement('button');
-            dismissButton.textContent = 'Затвори';
-            dismissButton.style.background = 'transparent';
-            dismissButton.style.border = 'none';
-            dismissButton.style.fontSize = '12px';
-            dismissButton.style.marginRight = '7px';
-            dismissButton.style.color = 'white';
-            dismissButton.style.textDecoration = 'underline';
-            dismissButton.style.cursor = 'pointer';
-            dismissButton.style.pointerEvents = 'auto';
-            dismissButton.addEventListener('click', () => {
-                toastContainer.removeChild(toast);
-                if (!toastContainer.firstChild) {
-                    toastContainer.remove();
-                }
-            });
-            toast.appendChild(dismissButton);
-
-            // Add toast to container
-            toastContainer.appendChild(toast);
-            toast.style.width = `${toastMessage.offsetWidth + 120}px`;
-
-            // Remove toast after 2.95 seconds -> a little before it fades out
-            setTimeout(() => {
-                if (toast.parentNode === toastContainer) {
-                    toastContainer.removeChild(toast);
-                    if (!toastContainer.firstChild) {
-                        toastContainer.remove();
-                    }
-                }
-            }, 2950);
-        }
-
         window.toggleSort = function(column) {
             const currentState = sortState[column];
             const nextState = currentState === 'asc' ? 'desc' : 'asc';
@@ -1344,11 +1310,13 @@
             showLocation(newLocation);
             if (newLocation.first)
             {
+                //loaded
                 if (map != null && lastPos != null)
                 {
                     map.panTo(lastPos);
                     map.setZoom(80);
                 }
+                document.getElementById('loadingOverlay').style.display = 'none';
             }
         });
         await initMap();
@@ -1357,7 +1325,18 @@
     </script>
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map-container">
+        <div id="loadingOverlay">
+            <div class="loading-content">
+                <div class="loading-icon"></div>
+                <div class="loading-text">
+                    <div class="loading-text">Зареждаме местоположението</div>
+                    <div class="location-text">Моля включете локация, ако е изключена</div>
+                </div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
     
     <div id="optionsSection" style="margin-top: 50px;">
         <h3>Опции
