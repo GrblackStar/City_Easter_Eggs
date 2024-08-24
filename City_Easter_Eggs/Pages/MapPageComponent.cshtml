@@ -575,6 +575,19 @@
                                                             object-fit: contain;
                                                             border: 1px solid #526375;
                                                         }
+                                                        #directionsButton {
+                                                            font-size: 16px; 
+                                                            margin-top: 10px;
+                                                            width: 100%;
+                                                            outline: none;
+                                                            border: none;
+                                                            box-shadow: none;
+                                                        }
+                                                        #directionsButton:focus {
+                                                            outline: none; 
+                                                            border: none;
+                                                            box-shadow: none;
+                                                        }
                                                     </style>
 
                                                     <div id="infoWindowContent">
@@ -600,7 +613,7 @@
                                                             </div>
                                                             <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'BookMarkedIcon.png' : 'BookMarkIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                                                         </div>
-                                                        <a href="${gMapNavigationLink}" target=”_blank” style="margin-left: 5px; font-weight: bold; font-size: 16px;"> Заведи ме там </a>
+                                                        <a id="directionsButton" href="${gMapNavigationLink}" target=”_blank” class="btn btn-lg btn-primary""> Заведи ме там </a>
                                                     </div>
                                                 `);
                 panelPointInfo.open(marker.map, marker);
