@@ -91,6 +91,9 @@ namespace City_Easter_Eggs.Controllers
 
         public async Task<PointOfInterestFrontend?> LikePoint(string markerId)
         {
+            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
+            if (point == null) throw new Exception("No point");
+
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             if (user == null) throw new Exception("No user");
 
@@ -98,11 +101,8 @@ namespace City_Easter_Eggs.Controllers
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
             if (currentUser == null) throw new Exception("No user");
 
-            if (currentUser.LikedPoints.Any(x => x.PointId == markerId)) throw new Exception("Already liked");
-
-            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
-
-            if (point == null) return null;
+            // silenty ignore
+            if (currentUser.LikedPoints.Any(x => x.PointId == markerId)) return new PointOfInterestFrontend(point, currentUser);
 
             var like = new LikedPoints
             {
@@ -124,6 +124,9 @@ namespace City_Easter_Eggs.Controllers
 
         public async Task<PointOfInterestFrontend?> FavoriteAddPoint(string markerId)
         {
+            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
+            if (point == null) throw new Exception("No point");
+
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             if (user == null) throw new Exception("No user");
 
@@ -131,9 +134,8 @@ namespace City_Easter_Eggs.Controllers
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
             if (currentUser == null) throw new Exception("No user");
 
-            if (currentUser.FavoritedPoints.Any(x => x.PointId == markerId)) throw new Exception("Already favorited");
-
-            PointOfInterest? point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
+            // silenty ignore
+            if (currentUser.FavoritedPoints.Any(x => x.PointId == markerId)) return new PointOfInterestFrontend(point, currentUser);
 
             if (point == null) return null;
 
@@ -153,6 +155,9 @@ namespace City_Easter_Eggs.Controllers
 
         public async Task<PointOfInterestFrontend> UnLikePoint(string markerId)
         {
+            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
+            if (point == null) throw new Exception("No point");
+
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             if (user == null) throw new Exception("No user");
 
@@ -160,10 +165,8 @@ namespace City_Easter_Eggs.Controllers
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
             if (currentUser == null) throw new Exception("No user");
 
-            if (!currentUser.LikedPoints.Any(x => x.PointId == markerId)) throw new Exception("Not liked");
-
-            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
-            if (point == null) return null;
+            // silenty ignore
+            if (!currentUser.LikedPoints.Any(x => x.PointId == markerId)) return new PointOfInterestFrontend(point, currentUser);
 
             LikedPoints? like = _context.LikedPoints.FirstOrDefault(l => l.User == currentUser && l.Point == point);
             if (like == null) return null;
@@ -184,6 +187,9 @@ namespace City_Easter_Eggs.Controllers
 
         public async Task<PointOfInterestFrontend> FavoriteRemovePoint(string markerId)
         {
+            PointOfInterest? point = _context.POIs.Include(x => x.Creator).FirstOrDefault(p => p.PointId == markerId);
+            if (point == null) throw new Exception("No point");
+
             ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
             if (user == null) throw new Exception("No user");
 
@@ -191,10 +197,8 @@ namespace City_Easter_Eggs.Controllers
             currentUser = _context.Users.Where(x => x == currentUser).Include(x => x.FavoritedPoints).Include(x => x.LikedPoints).FirstOrDefault();
             if (currentUser == null) throw new Exception("No user");
 
-            if (!currentUser.FavoritedPoints.Any(x => x.PointId == markerId)) throw new Exception("Not favorited");
-
-            PointOfInterest? point = _context.POIs.FirstOrDefault(p => p.PointId == markerId);
-            if (point == null) return null;
+            // silenty ignore
+            if (!currentUser.FavoritedPoints.Any(x => x.PointId == markerId)) return new PointOfInterestFrontend(point, currentUser);
 
             FavouritePoints? like = _context.FavouritePoints.FirstOrDefault(l => l.User == currentUser && l.Point == point);
             if (like == null) return null;
