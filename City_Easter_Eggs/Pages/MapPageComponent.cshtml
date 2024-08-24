@@ -517,15 +517,13 @@
                     }
                 };
 
-                let directionsButtonListener = function () {
-                    openGoogleMaps(thisPoint.latitude, thisPoint.longitude);
-                };
-
                 if (isInfoWindowOpen(panelCreatePoint))
                     panelCreatePoint.close();
 
                 if (isInfoWindowOpen(panelPointInfo))
                     panelPointInfo.close();
+
+                var gMapNavigationLink = `https://www.google.com/maps/dir/?api=1&destination=${thisPoint.latitude},${thisPoint.longitude}`;
 
                 panelPointInfo = new InfoWindow();
                 panelPointInfo.setContent(`
@@ -556,19 +554,6 @@
                                                             outline: 0;
                                                             width: 25px;
                                                             height: 25px;
-                                                        }
-                                                        #directionsButton {
-                                                            font-size: 16px; 
-                                                            margin-top: 10px;
-                                                            width: 100%;
-                                                            outline: none;
-                                                            border: none;
-                                                            box-shadow: none;
-                                                        }
-                                                        #directionsButton:focus {
-                                                            outline: none; 
-                                                            border: none;
-                                                            box-shadow: none;
                                                         }
                                                         .animate {
                                                             transition: transform 0.3s;
@@ -615,7 +600,7 @@
                                                             </div>
                                                             <button id="favoriteButton" style="margin-right: 5px"><img src="${favoriteByUser ? 'BookMarkedIcon.png' : 'BookMarkIcon.png'}" alt="Favorite" style="width: 25px; height: 25px;"></button>
                                                         </div>
-                                                        <button id="directionsButton" type="submit" class="btn btn-lg btn-primary"> Заведи ме там </button>
+                                                        <a href="${gMapNavigationLink}" target=”_blank” style="margin-left: 5px; font-weight: bold; font-size: 16px;"> Заведи ме там </a>
                                                     </div>
                                                 `);
                 panelPointInfo.open(marker.map, marker);
@@ -625,10 +610,8 @@
                 google.maps.event.addListener(panelPointInfo, 'domready', function () {
                     var likeButton = document.getElementById('likeButton');
                     var favoriteButton = document.getElementById('favoriteButton');
-                    var directionsButton = document.getElementById('directionsButton');
                     if (likeButton != null) likeButton.addEventListener('click', likeButtonListener);
                     if (favoriteButton != null) favoriteButton.addEventListener('click', favoriteButtonListener);
-                    if (directionsButton != null) directionsButton.addEventListener('click', directionsButtonListener);
                 });
             });
             return marker;
@@ -1016,6 +999,8 @@
             controlButton.style.outline = "none";
             controlButton.style.border = "none";
             controlButton.style.boxShadow = "none";
+            controlButton.style.marginTop = "7px";
+            controlButton.style.marginLeft = "7px";
             controlButton.addEventListener("click", async function () {
                 if (map != null && lastPos != null) {
                     // it shouldn't get the position again, because otherwise it could get the pos wrong and update it
@@ -1123,7 +1108,6 @@
                                                             <button id="createPointCancel" type="button" class="btn btn-secondary" style="padding-left: 15px; padding-right: 15px">Отказ</button>
                                                         </div>
                                                     `;
-
                     var lastImageBase64 = null;
 
                     form.addEventListener('submit', function (event) {
@@ -1135,6 +1119,8 @@
                         object.image = lastImageBase64;
                         var json = JSON.stringify(object);
 
+                        var submitButton = document.getElementById('createPointSubmit');
+                        submitButton.disabled = true;
                         fetch('/Points/CreatePoint', {
                             method: 'POST',
                             headers: {
@@ -1165,6 +1151,7 @@
                                     }
                                 });
                             }
+                            submitButton.disabled = false;
                         });
                     });
 
@@ -1201,12 +1188,16 @@
                             imageUploader.addEventListener('change', (ev) => {
                                 var selectedFile = imageUploader.files[0];
                                 if (selectedFile == null) return;
+
+                                var submitButton = document.getElementById('createPointSubmit');
+                                submitButton.disabled = true;
                                 imageShow.src = URL.createObjectURL(selectedFile)
                                 imageShow.onload = () => {
                                     URL.revokeObjectURL(imageShow.src);
                                 };
                                 convertFileToBase64(selectedFile).then(x => {
                                     lastImageBase64 = x
+                                    submitButton.disabled = false;
                                 })
                             });
                     });
@@ -1283,13 +1274,6 @@
                     header.classList.add('desc');
                 }
             });
-        }
-
-        function openGoogleMaps(lat, lng) {
-            const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-            // opens a new tab: window.open(googleMapsUrl, '_blank');
-            // directly navigates from the current tab
-            window.location.href = googleMapsUrl;
         }
 
         window.updateOnOpionsChange = function (radius, liked, saved, created, searchInput, selectedColumn) {
