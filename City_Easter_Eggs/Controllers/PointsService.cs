@@ -321,12 +321,6 @@ namespace City_Easter_Eggs.Controllers
             },
             new PointOfInterest()
             {
-                Name = "Metrostation Musagenitsa",
-                Latitude = 42.6541842,
-                Longitude = 23.3719218,
-            },
-            new PointOfInterest()
-            {
                 Name = "Metrostation Mladost 1",
                 Latitude = 42.6586002,
                 Longitude = 23.3643255,
