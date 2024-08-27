@@ -52,6 +52,11 @@ namespace City_Easter_Eggs.Controllers
             _reusableList.Clear();
             _quadTree.GetAllObjects(_reusableList);
             if (_reusableList.Count == 0) return;
+            for (int i = _reusableList.Count - 1; i >= 0; i--)
+            {
+                var point = _reusableList[i];
+                if (point.PointId.Contains("SystemPoint")) _reusableList.Remove(point);
+            }
 
             _reusableList.Sort((a, b) => MathF.Sign(a.Likes - b.Likes));
             int top = (int)MathF.Floor(_reusableList.Count * 0.9f);
