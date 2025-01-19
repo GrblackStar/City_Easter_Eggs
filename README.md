@@ -1,2 +1,1 @@
-# Diploma_Project
-Asp.Net project with entity framework
+https://cityeastereggs.com/
